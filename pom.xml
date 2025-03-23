@@ -12,6 +12,7 @@
 	<artifactId>inventra</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>inventra</name>
+	<packaging>pom</packaging>
 	<description>Inventory management service</description>
 	<url/>
 	<licenses>
