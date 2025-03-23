@@ -1,12 +1,15 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -6,7 +6,6 @@
 		<groupId>ba.unsa.etf.nwt</groupId>
 		<artifactId>inventra</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ba.unsa.etf.nwt.inventra</groupId>
 	<artifactId>inventory-service</artifactId>
