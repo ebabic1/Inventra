@@ -51,6 +51,10 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<version>9.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
