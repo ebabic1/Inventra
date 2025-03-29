@@ -1,5 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.config;
 
+import ba.unsa.etf.nwt.inventra.reporting_service.enums.ReportType;
 import ba.unsa.etf.nwt.inventra.reporting_service.model.*;
 import ba.unsa.etf.nwt.inventra.reporting_service.repository.*;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Configuration
 public class LoadDatabase {
@@ -59,12 +61,16 @@ public class LoadDatabase {
             log.info("Preloaded: {}", orderArticle2);
 
             Report report1 = new Report();
-            report1.setGeneratedAt(LocalDate.now());
+            report1.setGeneratedAt(LocalDateTime.now());
+            report1.setUserId(1L);
+            report1.setType(ReportType.FINANCIAL);
             reportRepository.save(report1);
             log.info("Preloaded: {}", report1);
 
             Report report2 = new Report();
-            report2.setGeneratedAt(LocalDate.now());
+            report2.setGeneratedAt(LocalDateTime.now());
+            report2.setUserId(1L);
+            report2.setType(ReportType.FINANCIAL);
             reportRepository.save(report2);
             log.info("Preloaded: {}", report2);
 

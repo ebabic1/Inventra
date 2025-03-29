@@ -2,6 +2,7 @@ package ba.unsa.etf.nwt.inventra.reporting_service.controller;
 
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.ReportDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.service.ReportService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ReportController {
     }
 
     @PostMapping
-    public ResponseEntity<ReportDTO> create(@RequestBody ReportDTO reportDTO) {
+    public ResponseEntity<ReportDTO> create(@Valid @RequestBody ReportDTO reportDTO) {
         ReportDTO createdReport = reportService.createReport(reportDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -6,7 +6,6 @@ import ba.unsa.etf.nwt.inventra.reporting_service.model.Report;
 import ba.unsa.etf.nwt.inventra.reporting_service.repository.ReportRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -22,7 +21,7 @@ public class ReportService {
 
     public ReportDTO createReport(ReportDTO reportDTO) {
         Report report = reportMapper.reportDTOToReport(reportDTO);
-        report.setGeneratedAt(LocalDate.from(LocalDateTime.now()));
+        report.setGeneratedAt(LocalDateTime.now());
         report.setUserId(reportDTO.getUserId());
         Report savedReport = reportRepository.save(report);
         return reportMapper.reportToReportDTO(savedReport);

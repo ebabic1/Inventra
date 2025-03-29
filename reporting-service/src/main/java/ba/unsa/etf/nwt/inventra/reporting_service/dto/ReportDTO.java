@@ -1,17 +1,21 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.dto;
 
+import ba.unsa.etf.nwt.inventra.reporting_service.enums.ReportType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportDTO {
-    private LocalDate generatedAt;
+    @NotNull(message = "User ID is required")
+    @Positive(message = "User ID must be positive")
     private Long userId;
+    @NotNull(message = "Type is required")
+    private ReportType type;
 }
