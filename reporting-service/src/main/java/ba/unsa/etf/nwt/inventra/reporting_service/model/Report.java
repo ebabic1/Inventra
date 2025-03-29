@@ -1,5 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Report {
     private LocalDate generatedAt;
     private Long userId;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "report")
     private List<OrderReport> orderReports;
 }

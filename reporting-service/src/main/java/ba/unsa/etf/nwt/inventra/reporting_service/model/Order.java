@@ -1,5 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class Order {
     private Long id;
     private LocalDate orderDate;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderArticle> orderArticles;
 }

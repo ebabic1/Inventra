@@ -1,5 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +20,6 @@ public class Article {
     private String category;
 
     @OneToMany(mappedBy = "article")
+    @JsonIgnore
     private List<OrderArticle> orderArticles;
 }
