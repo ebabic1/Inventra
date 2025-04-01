@@ -38,11 +38,6 @@ public class WarehouseService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Warehouse not found with id: " + id));
 
-        if (warehouseDTO.getId() != null && !id.equals(warehouseDTO.getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "ID in path doesn't match request body");
-        }
-
         existing.setName(warehouseDTO.getName());
         existing.setAddress(warehouseDTO.getAddress());
         existing.setZipCode(warehouseDTO.getZipCode());

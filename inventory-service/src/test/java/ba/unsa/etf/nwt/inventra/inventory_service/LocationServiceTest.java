@@ -70,9 +70,8 @@ class LocationServiceTest {
         when(locationRepository.save(location)).thenReturn(location);
         when(locationMapper.toDTO(location)).thenReturn(locationDTO);
 
-        Optional<LocationDTO> result = locationService.create(locationDTO);
+        LocationDTO result = locationService.create(locationDTO);
 
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
+        assertEquals(1L, result.getId());
     }
 }

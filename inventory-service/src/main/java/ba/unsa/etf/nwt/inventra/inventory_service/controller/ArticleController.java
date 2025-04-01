@@ -3,6 +3,10 @@ package ba.unsa.etf.nwt.inventra.inventory_service.controller;
 import ba.unsa.etf.nwt.inventra.inventory_service.dto.ArticleDTO;
 import ba.unsa.etf.nwt.inventra.inventory_service.mapper.ArticleMapper;
 import ba.unsa.etf.nwt.inventra.inventory_service.service.ArticleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +25,10 @@ public class ArticleController {
     private final ArticleService articleService;
     private final ArticleMapper articleMapper;
 
+    @Operation(summary = "Get all articles", description = "Retrieve a list of all articles in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of articles")
+    })
     @GetMapping
     public ResponseEntity<List<ArticleDTO>> getAllArticles() {
         List<Article> articles = articleService.findAll();
@@ -29,17 +37,28 @@ public class ArticleController {
                 .toList());
     }
 
+    @Operation(summary = "Get article by ID", description = "Retrieve a specific article by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the article"),
+            @ApiResponse(responseCode = "404", description = "Article not found")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Long id) {
+    public ResponseEntity<ArticleDTO> getArticleById(
+            @Parameter(description = "ID of the article to be retrieved") @PathVariable Long id) {
         return articleService.findById(id)
                 .map(articleMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-
     }
 
+    @Operation(summary = "Create a new article", description = "Create a new article and store it in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created the article"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
     @PostMapping
-    public ResponseEntity<ArticleDTO> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
+    public ResponseEntity<ArticleDTO> createArticle(
+            @Valid @RequestBody ArticleDTO articleDTO) {
         Article article = articleMapper.toEntity(articleDTO);
         Article createdArticle = articleService.create(article);
         return ResponseEntity
@@ -47,17 +66,29 @@ public class ArticleController {
                 .body(articleMapper.toDTO(createdArticle));
     }
 
+    @Operation(summary = "Update an existing article", description = "Update the details of an existing article by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated the article"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Article not found")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ArticleDTO> updateArticle(
-            @PathVariable Long id,
+            @Parameter(description = "ID of the article to be updated") @PathVariable Long id,
             @Valid @RequestBody ArticleDTO articleDTO) {
         Article article = articleMapper.toEntity(articleDTO);
         Article updatedArticle = articleService.update(id, article);
         return ResponseEntity.ok(articleMapper.toDTO(updatedArticle));
     }
 
+    @Operation(summary = "Delete an article", description = "Delete an article from the system by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the article"),
+            @ApiResponse(responseCode = "404", description = "Article not found")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArticle(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteArticle(
+            @Parameter(description = "ID of the article to be deleted") @PathVariable Long id) {
         articleService.delete(id);
         return ResponseEntity.noContent().build();
     }

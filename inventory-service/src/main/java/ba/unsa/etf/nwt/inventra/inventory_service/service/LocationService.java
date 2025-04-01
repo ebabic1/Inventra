@@ -37,7 +37,7 @@ public class LocationService {
     }
 
     @Transactional
-    public Optional<LocationDTO> create(LocationDTO locationDTO) {
+    public LocationDTO create(LocationDTO locationDTO) {
         Warehouse warehouse = warehouseRepository.findById(locationDTO.getWarehouseId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Warehouse not found"));
@@ -45,18 +45,14 @@ public class LocationService {
         Location location = locationMapper.toEntity(locationDTO);
         location.setWarehouse(warehouse);
         Location savedLocation = locationRepository.save(location);
-        return Optional.of(locationMapper.toDTO(savedLocation));
+        return locationMapper.toDTO(savedLocation);
     }
 
     @Transactional
-    public Optional<LocationDTO> update(Long id, LocationDTO locationDTO) {
-        Optional<Location> existingLocationOpt = locationRepository.findById(id);
-
-        if (!existingLocationOpt.isPresent()) {
-            return Optional.empty();
-        }
-
-        Location existingLocation = existingLocationOpt.get();
+    public LocationDTO update(Long id, LocationDTO locationDTO) {
+        Location existingLocation = locationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Location not found with id: " + id));
 
         if (!existingLocation.getWarehouse().getId().equals(locationDTO.getWarehouseId())) {
             Warehouse newWarehouse = warehouseRepository.findById(locationDTO.getWarehouseId())
@@ -66,7 +62,7 @@ public class LocationService {
         }
 
         Location updatedLocation = locationRepository.save(existingLocation);
-        return Optional.of(locationMapper.toDTO(updatedLocation));
+        return locationMapper.toDTO(updatedLocation);
     }
 
     @Transactional
