@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
