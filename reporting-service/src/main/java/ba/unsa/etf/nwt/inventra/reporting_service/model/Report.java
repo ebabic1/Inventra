@@ -1,6 +1,5 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.model;
 
-import ba.unsa.etf.nwt.inventra.reporting_service.enums.ReportType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

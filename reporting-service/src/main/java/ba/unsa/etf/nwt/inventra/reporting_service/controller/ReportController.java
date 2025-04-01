@@ -2,10 +2,15 @@ package ba.unsa.etf.nwt.inventra.reporting_service.controller;
 
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.ReportDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.service.ReportService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -17,12 +22,29 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @PostMapping
-    public ResponseEntity<ReportDTO> create(@Valid @RequestBody ReportDTO reportDTO) {
-        ReportDTO createdReport = reportService.createReport(reportDTO);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(createdReport);
+    @GetMapping("/orders")
+    public ResponseEntity<byte[]> getOrderSummaryReport(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        LocalDateTime start = LocalDateTime.parse(startDate);
+        LocalDateTime end = LocalDateTime.parse(endDate);
+        byte[] pdfContent = reportService.generateOrderSummaryReport(start, end);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=order_report.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+    }
+
+    @GetMapping("/most-ordered-articles")
+    public ResponseEntity<byte[]>  generateArticleOrderedReport() {
+        byte[] pdfContent = reportService.generateArticleOrderedReport();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=most_ordered_articles_report.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
     }
 
 //    @GetMapping

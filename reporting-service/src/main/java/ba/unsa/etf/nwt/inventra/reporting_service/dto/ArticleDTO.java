@@ -13,4 +13,5 @@ public class ArticleDTO {
     private String name;
     private double price;
     private String category;
+    private Long totalQuantityOrdered;
 }

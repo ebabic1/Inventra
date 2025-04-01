@@ -1,6 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.config;
 
-import ba.unsa.etf.nwt.inventra.reporting_service.enums.ReportType;
+import ba.unsa.etf.nwt.inventra.reporting_service.model.ReportType;
 import ba.unsa.etf.nwt.inventra.reporting_service.model.*;
 import ba.unsa.etf.nwt.inventra.reporting_service.repository.*;
 import org.slf4j.Logger;
@@ -37,12 +37,12 @@ public class LoadDatabase {
             log.info("Preloaded: {}", article2);
 
             Order order1 = new Order();
-            order1.setOrderDate(LocalDate.now());
+            order1.setOrderDate(LocalDateTime.now());
             order1 = orderRepository.save(order1);
             log.info("Preloaded: {}", order1);
 
             Order order2 = new Order();
-            order2.setOrderDate(LocalDate.now());
+            order2.setOrderDate(LocalDateTime.now());
             order2 = orderRepository.save(order2);
             log.info("Preloaded: {}", order2);
 

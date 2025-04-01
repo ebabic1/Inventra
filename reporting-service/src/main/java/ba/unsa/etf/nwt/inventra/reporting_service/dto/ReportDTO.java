@@ -1,6 +1,6 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.dto;
 
-import ba.unsa.etf.nwt.inventra.reporting_service.enums.ReportType;
+import ba.unsa.etf.nwt.inventra.reporting_service.model.ReportType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
