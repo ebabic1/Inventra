@@ -47,11 +47,6 @@ public class SupplierService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Supplier not found with id: " + id));
 
-        if (supplierDTO.getId() != null && !id.equals(supplierDTO.getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "ID in path doesn't match request body");
-        }
-
         existingSupplier.setName(supplierDTO.getName());
         Supplier savedSupplier = supplierRepository.save(existingSupplier);
         return supplierMapper.toDTO(savedSupplier);

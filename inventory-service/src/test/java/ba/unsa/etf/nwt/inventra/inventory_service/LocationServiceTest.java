@@ -48,7 +48,6 @@ class LocationServiceTest {
         location.setWarehouse(warehouse);
 
         locationDTO = new LocationDTO();
-        locationDTO.setId(1L);
         locationDTO.setWarehouseId(1L);
     }
 
@@ -60,7 +59,6 @@ class LocationServiceTest {
         Optional<LocationDTO> result = locationService.findById(1L);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
     }
 
     @Test
@@ -72,6 +70,5 @@ class LocationServiceTest {
 
         LocationDTO result = locationService.create(locationDTO);
 
-        assertEquals(1L, result.getId());
     }
 }

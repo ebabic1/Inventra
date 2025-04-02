@@ -44,7 +44,10 @@ public class ArticleService {
     public Article update(Long id, Article article) {
         Article existingArticle = articleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found with id: " + id));
-
+        locationRepository.findById(article.getLocation().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with id: " + article.getLocation().getId()));
+        supplierRepository.findById(article.getSupplier().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found with id: " + article.getSupplier().getId()));
         article.setId(existingArticle.getId());
         return articleRepository.save(article);
     }

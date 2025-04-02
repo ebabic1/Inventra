@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class SupplierDTO {
-    private Long id;
-
     @NotBlank(message = "Supplier name is required")
     @Size(max = 100, message = "Supplier name cannot be longer than 100 characters")
     private String name;

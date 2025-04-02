@@ -39,7 +39,6 @@ class SupplierServiceTest {
         supplier.setName("Test Supplier");
 
         supplierDTO = new SupplierDTO();
-        supplierDTO.setId(1L);
         supplierDTO.setName("Test Supplier");
     }
 

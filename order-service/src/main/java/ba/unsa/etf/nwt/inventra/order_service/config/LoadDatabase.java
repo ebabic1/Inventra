@@ -1,9 +1,6 @@
 package ba.unsa.etf.nwt.inventra.order_service.config;
 
-import ba.unsa.etf.nwt.inventra.order_service.model.Article;
-import ba.unsa.etf.nwt.inventra.order_service.model.Order;
-import ba.unsa.etf.nwt.inventra.order_service.model.OrderArticle;
-import ba.unsa.etf.nwt.inventra.order_service.model.Supplier;
+import ba.unsa.etf.nwt.inventra.order_service.model.*;
 import ba.unsa.etf.nwt.inventra.order_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.order_service.repository.OrderArticleRepository;
 import ba.unsa.etf.nwt.inventra.order_service.repository.OrderRepository;
@@ -37,10 +34,16 @@ public class LoadDatabase {
         return args -> {
             Supplier supplier1 = new Supplier();
             supplier1.setName("Tech Supplies Ltd.");
-            supplier1 = supplierRepository.save(supplier1); // Save and get ID
+            supplier1.setEmail("tech@gmail.com");
+            supplier1.setCategory(SupplierCategory.LOCAL);
+            supplier1.setPhone("12345678999");
+            supplier1 = supplierRepository.save(supplier1);
 
             Supplier supplier2 = new Supplier();
             supplier2.setName("Office Essentials Co.");
+            supplier2.setEmail("tech@gmail.com");
+            supplier2.setCategory(SupplierCategory.LOCAL);
+            supplier2.setPhone("12345678999");
             supplier2 = supplierRepository.save(supplier2);
 
             Article article1 = new Article();
