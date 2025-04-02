@@ -82,13 +82,8 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.8.6</version>
 		</dependency>
-        <dependency>
-            <groupId>ba.unsa.etf.nwt.inventra</groupId>
-            <artifactId>reporting-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
+
+	</dependencies>
 
 	<build>
 		<plugins>

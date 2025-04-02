@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -43,19 +45,13 @@ public class ArticleControllerTest {
         article1.setId(1L);
         article1.setName("Article 1");
 
-        ArticleDTO articleDTO1 = new ArticleDTO();
-        articleDTO1.setName("ArticleDTO 1");
-
         Article article2 = new Article();
         article2.setId(2L);
         article2.setName("Article 2");
 
-        ArticleDTO articleDTO2 = new ArticleDTO();
-        articleDTO2.setName("ArticleDTO 2");
+        when(articleService.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(article1, article2)));
 
-        List<Article> articles = List.of(article1, article2);
-
-        when(articleService.findAll()).thenReturn(articles);
         when(articleMapper.toDTO(any())).thenAnswer(invocation -> {
             Article a = invocation.getArgument(0);
             ArticleDTO articleDTO = new ArticleDTO();

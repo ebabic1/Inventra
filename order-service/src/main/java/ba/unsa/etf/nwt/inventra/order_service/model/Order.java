@@ -2,6 +2,7 @@ package ba.unsa.etf.nwt.inventra.order_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
+    @NotBlank(message = "Order name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name;
 
@@ -37,8 +38,8 @@ public class Order {
     @FutureOrPresent(message = "Order date must be today or in the future")
     private LocalDate orderDate;
 
-    @NotNull(message = "Expiry date cannot be null")
-    @FutureOrPresent(message = "Expiry date must be today or in the future")
+    @NotNull(message = "Delivery date cannot be null")
+    @FutureOrPresent(message = "Delivery date must be today or in the future")
     private LocalDate deliveryDate;
 
     @Enumerated(EnumType.STRING)

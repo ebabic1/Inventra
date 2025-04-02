@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,13 +19,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OrderController.class)
 @ExtendWith(MockitoExtension.class)
@@ -46,21 +44,14 @@ public class OrderControllerTest {
         order1.setOrderDate(LocalDate.now());
         order1.setDeliveryDate(LocalDate.now().plusDays(5));
 
-        OrderDTO orderDTO1 = new OrderDTO();
-        orderDTO1.setName("OrderDTO 1");
-
         Order order2 = new Order();
         order2.setId(2L);
         order2.setName("Order 2");
         order2.setOrderDate(LocalDate.now());
         order2.setDeliveryDate(LocalDate.now().plusDays(3));
 
-        OrderDTO orderDTO2 = new OrderDTO();
-        orderDTO2.setName("OrderDTO 2");
-
-        List<Order> orders = List.of(order1, order2);
-
-        when(orderService.findAll()).thenReturn(orders);
+        when(orderService.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(order1, order2)));
         when(orderMapper.toDTO(any())).thenAnswer(invocation -> {
             Order o = invocation.getArgument(0);
             OrderDTO orderDTO = new OrderDTO();

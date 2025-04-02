@@ -56,15 +56,9 @@ public class OrderArticleControllerTest {
         orderArticle1.setId(1L);
         orderArticle1.setQuantity(5);
 
-        OrderArticleDTO orderArticleDTO1 = new OrderArticleDTO();
-        orderArticleDTO1.setQuantity(5);
-
         OrderArticle orderArticle2 = new OrderArticle();
         orderArticle2.setId(2L);
         orderArticle2.setQuantity(10);
-
-        OrderArticleDTO orderArticleDTO2 = new OrderArticleDTO();
-        orderArticleDTO2.setQuantity(10);
 
         return List.of(orderArticle1, orderArticle2);
     }
