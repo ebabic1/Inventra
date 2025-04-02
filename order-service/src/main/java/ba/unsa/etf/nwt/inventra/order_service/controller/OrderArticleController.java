@@ -4,7 +4,10 @@ import ba.unsa.etf.nwt.inventra.order_service.dto.OrderArticleDTO;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderArticleMapper;
 import ba.unsa.etf.nwt.inventra.order_service.model.OrderArticle;
 import ba.unsa.etf.nwt.inventra.order_service.service.OrderArticleService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,10 @@ public class OrderArticleController {
     private final OrderArticleService orderArticleService;
     private final OrderArticleMapper orderArticleMapper;
 
+    @Operation(summary = "Get all order articles", description = "Retrieve a list of all order articles.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of order articles retrieved successfully")
+    })
     @GetMapping
     public ResponseEntity<List<OrderArticleDTO>> getAllOrderArticles() {
         List<OrderArticle> orderArticles = orderArticleService.findAll();
@@ -29,6 +36,11 @@ public class OrderArticleController {
                 .toList());
     }
 
+    @Operation(summary = "Get order article by ID", description = "Retrieve an order article by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order article retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Order article not found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<OrderArticleDTO> getOrderArticleById(
             @Parameter(description = "ID of the order-article to be retrieved") @PathVariable Long id) {
@@ -38,6 +50,10 @@ public class OrderArticleController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Create a new order article", description = "Create a new order article.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Order article created successfully")
+    })
     @PostMapping
     public ResponseEntity<OrderArticleDTO> createOrderArticle(
             @Valid @RequestBody OrderArticleDTO orderArticleDTO) {
@@ -48,6 +64,11 @@ public class OrderArticleController {
                 .body(orderArticleMapper.toDTO(createdOrderArticle));
     }
 
+    @Operation(summary = "Update an existing order article", description = "Update the details of an existing order article.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order article updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Order article not found")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<OrderArticleDTO> updateOrderArticle(
             @Parameter(description = "ID of the order-article to be updated") @PathVariable Long id,
@@ -57,6 +78,11 @@ public class OrderArticleController {
         return ResponseEntity.ok(orderArticleMapper.toDTO(updatedOrderArticle));
     }
 
+    @Operation(summary = "Delete an order article", description = "Delete an order article by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Order article deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Order article not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrderArticle(
             @Parameter(description = "ID of the order-article to be deleted") @PathVariable Long id) {
