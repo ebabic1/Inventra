@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ArticleDTO {
-    private Long id;
     private String name;
-    private double price;
+    private Double price;
 }

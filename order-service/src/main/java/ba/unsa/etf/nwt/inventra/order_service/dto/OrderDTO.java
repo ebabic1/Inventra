@@ -9,16 +9,13 @@ import java.time.LocalDate;
 
 @Data
 public class OrderDTO {
-    private Long id;
     private String name;
     private LocalDate orderDate;
-    private LocalDate expiryDate;
+    private LocalDate deliveryDate;
     private OrderStatus status;
     private String invoice;
     private String purchaseOrder;
     private String note;
     private Long userId;
-
-    @NotNull(message = "Supplier ID is required")
     private Long supplierId;
 }

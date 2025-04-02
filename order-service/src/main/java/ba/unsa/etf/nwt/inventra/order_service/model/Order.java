@@ -33,7 +33,7 @@ public class Order {
 
     @NotNull(message = "Expiry date cannot be null")
     @FutureOrPresent(message = "Expiry date must be today or in the future")
-    private LocalDate expiryDate;
+    private LocalDate deliveryDate;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

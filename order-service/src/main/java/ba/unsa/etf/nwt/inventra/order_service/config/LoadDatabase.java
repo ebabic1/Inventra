@@ -1,5 +1,7 @@
 package ba.unsa.etf.nwt.inventra.order_service.config;
 
+import ba.unsa.etf.nwt.inventra.order_service.model.OrderStatus;
+import ba.unsa.etf.nwt.inventra.order_service.model.SupplierCategory;
 import ba.unsa.etf.nwt.inventra.order_service.model.Article;
 import ba.unsa.etf.nwt.inventra.order_service.model.Order;
 import ba.unsa.etf.nwt.inventra.order_service.model.OrderArticle;
@@ -37,10 +39,16 @@ public class LoadDatabase {
         return args -> {
             Supplier supplier1 = new Supplier();
             supplier1.setName("Tech Supplies Ltd.");
-            supplier1 = supplierRepository.save(supplier1); // Save and get ID
+            supplier1.setPhone("+12345678901");
+            supplier1.setEmail("contact@techsupplies.com");
+            supplier1.setCategory(SupplierCategory.LOCAL);
+            supplier1 = supplierRepository.save(supplier1);
 
             Supplier supplier2 = new Supplier();
             supplier2.setName("Office Essentials Co.");
+            supplier2.setPhone("+10987654321");
+            supplier2.setEmail("sales@officeessentials.com");
+            supplier2.setCategory(SupplierCategory.INTERNATIONAL);
             supplier2 = supplierRepository.save(supplier2);
 
             Article article1 = new Article();
@@ -58,10 +66,10 @@ public class LoadDatabase {
             order1.setUserId(1L);
             order1.setSupplier(supplier1);
             order1.setOrderDate(LocalDate.now());
-            order1.setExpiryDate(LocalDate.now().plusDays(30));
+            order1.setDeliveryDate(LocalDate.now().plusDays(30));
             order1.setInvoice("INV-2024001");
+            order1.setStatus(OrderStatus.PENDING);
             order1.setNote("Urgent delivery required.");
-            order1.setSupplier(supplier1);
             order1 = orderRepository.save(order1);
 
             Order order2 = new Order();
@@ -69,10 +77,10 @@ public class LoadDatabase {
             order2.setUserId(2L);
             order2.setSupplier(supplier2);
             order2.setOrderDate(LocalDate.now());
-            order2.setExpiryDate(LocalDate.now().plusDays(20));
+            order2.setDeliveryDate(LocalDate.now().plusDays(20));
             order2.setInvoice("INV-2024002");
+            order2.setStatus(OrderStatus.NOT_SENT);
             order2.setNote("Ensure quality checks.");
-            order2.setSupplier(supplier2);
             order2 = orderRepository.save(order2);
 
             OrderArticle orderArticle1 = new OrderArticle();
