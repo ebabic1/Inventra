@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ArticleDTO {
     private String name;
-    private double price;
+    private Double price;
     private String category;
     private Long totalQuantityOrdered;
 }

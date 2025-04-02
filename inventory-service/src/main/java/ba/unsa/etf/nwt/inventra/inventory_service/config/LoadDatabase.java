@@ -59,12 +59,14 @@ public class LoadDatabase {
             article1.setName("Article 1");
             article1.setSupplier(supplier1);
             article1.setLocation(location1);
+            article1.setPrice(3.99);
             articleRepository.save(article1);
 
             Article article2 = new Article();
             article2.setName("Article 2");
             article2.setSupplier(supplier1);
             article2.setLocation(location2);
+            article2.setPrice(20.5);
             articleRepository.save(article2);
         };
     }

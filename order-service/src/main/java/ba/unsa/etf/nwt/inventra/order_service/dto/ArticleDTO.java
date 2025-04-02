@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ArticleDTO {
     private String name;
-    private double price;
+    private Double price;
 }

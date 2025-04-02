@@ -9,7 +9,6 @@ import java.time.LocalDate;
 
 @Data
 public class OrderDTO {
-    private Long id;
     private String name;
     private LocalDate orderDate;
     private LocalDate expiryDate;

@@ -27,7 +27,7 @@ public class Article {
 
     @NotNull(message = "Price cannot be null")
     @Positive(message = "Price must be a positive number")
-    private double price;
+    private Double price;
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderArticle> orderArticles;

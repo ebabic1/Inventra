@@ -17,6 +17,12 @@ import java.util.List;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@NamedEntityGraph(
+        name = "Order.detail",
+        attributeNodes = {
+                @NamedAttributeNode("supplier"),
+        }
+)
 @Table(name = "`order`")
 public class Order {
     @Id

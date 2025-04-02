@@ -11,14 +11,21 @@ import java.time.LocalDate;
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(
+        name = "Article.detail",
+        attributeNodes = {
+                @NamedAttributeNode("supplier"),
+                @NamedAttributeNode("location")
+        }
+)
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int quantity;
+    private Integer quantity;
     private LocalDate expiryDate;
-    private double price;
+    private Double price;
     private String category;
     private String description;
     private String image;

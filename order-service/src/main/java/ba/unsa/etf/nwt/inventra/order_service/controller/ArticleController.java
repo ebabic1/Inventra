@@ -1,17 +1,24 @@
 package ba.unsa.etf.nwt.inventra.order_service.controller;
 
 import ba.unsa.etf.nwt.inventra.order_service.dto.ArticleDTO;
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDTO;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.ArticleMapper;
 import ba.unsa.etf.nwt.inventra.order_service.model.Article;
+import ba.unsa.etf.nwt.inventra.order_service.model.Order;
 import ba.unsa.etf.nwt.inventra.order_service.service.ArticleService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -22,11 +29,20 @@ public class ArticleController {
     private final ArticleMapper articleMapper;
 
     @GetMapping
-    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        List<Article> articles = articleService.findAll();
-        return ResponseEntity.ok(articles.stream()
+    public ResponseEntity<List<ArticleDTO>> getAllArticles(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy) {
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Article> pagedResult = articleService.findAll(pageable);
+
+        List<ArticleDTO> articles = pagedResult.getContent()
+                .stream()
                 .map(articleMapper::toDTO)
-                .toList());
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(articles);
     }
 
     @GetMapping("/{id}")
