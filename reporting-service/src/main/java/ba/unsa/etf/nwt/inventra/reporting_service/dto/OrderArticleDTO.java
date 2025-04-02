@@ -14,6 +14,6 @@ import lombok.Setter;
 public class OrderArticleDTO {
     private Order order;
     private Article article;
-    private int quantity;
+    private Integer quantity;
 }
 

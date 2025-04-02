@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +20,7 @@ import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -25,16 +30,60 @@ public class ArticleController {
     private final ArticleService articleService;
     private final ArticleMapper articleMapper;
 
+    @Operation(summary = "Batch insert articles", description = "Insert multiple articles in a single request")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully inserted articles"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    @PostMapping("/batch")
+    public ResponseEntity<List<ArticleDTO>> createArticlesBatch(@Valid @RequestBody List<ArticleDTO> articleDTOs) {
+        List<Article> articles = articleDTOs.stream()
+                .map(articleMapper::toEntity)
+                .collect(Collectors.toList());
+
+        List<Article> createdArticles = articleService.createBatch(articles);
+
+        List<ArticleDTO> responseDTOs = createdArticles.stream()
+                .map(articleMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTOs);
+    }
+
+    @Operation(summary = "Partially update an article", description = "Update only specific fields of an existing article")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated the article"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Article not found")
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<ArticleDTO> patchArticle(
+            @Parameter(description = "ID of the article to be patched") @PathVariable Long id,
+            @RequestBody ArticleDTO articleDTO) {
+        Article articleUpdates = articleMapper.toEntity(articleDTO);
+        Article updatedArticle = articleService.patchArticle(id, articleUpdates);
+        return ResponseEntity.ok(articleMapper.toDTO(updatedArticle));
+    }
+
     @Operation(summary = "Get all articles", description = "Retrieve a list of all articles in the system")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of articles")
     })
     @GetMapping
-    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        List<Article> articles = articleService.findAll();
-        return ResponseEntity.ok(articles.stream()
+    public ResponseEntity<List<ArticleDTO>> getAllArticles(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy) {
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Article> pagedResult = articleService.findAll(pageable);
+
+        List<ArticleDTO> articles = pagedResult.getContent()
+                .stream()
                 .map(articleMapper::toDTO)
-                .toList());
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(articles);
     }
 
     @Operation(summary = "Get article by ID", description = "Retrieve a specific article by its ID")

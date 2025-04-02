@@ -16,7 +16,7 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private double price;
+    private Double price;
     private String category;
 
     @OneToMany(mappedBy = "article")

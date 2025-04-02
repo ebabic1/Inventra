@@ -1,11 +1,6 @@
 package ba.unsa.etf.nwt.inventra.order_service.config;
 
-import ba.unsa.etf.nwt.inventra.order_service.model.OrderStatus;
-import ba.unsa.etf.nwt.inventra.order_service.model.SupplierCategory;
-import ba.unsa.etf.nwt.inventra.order_service.model.Article;
-import ba.unsa.etf.nwt.inventra.order_service.model.Order;
-import ba.unsa.etf.nwt.inventra.order_service.model.OrderArticle;
-import ba.unsa.etf.nwt.inventra.order_service.model.Supplier;
+import ba.unsa.etf.nwt.inventra.order_service.model.*;
 import ba.unsa.etf.nwt.inventra.order_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.order_service.repository.OrderArticleRepository;
 import ba.unsa.etf.nwt.inventra.order_service.repository.OrderRepository;

@@ -10,7 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -30,10 +33,10 @@ public class ArticleControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ArticleService articleService;
 
-    @MockBean
+    @MockitoBean
     private ArticleMapper articleMapper;
 
     @Test
@@ -42,25 +45,16 @@ public class ArticleControllerTest {
         article1.setId(1L);
         article1.setName("New Article 1");
 
-        ArticleDTO articleDTO1 = new ArticleDTO();
-        articleDTO1.setId(1L);
-        articleDTO1.setName("New ArticleDTO 1");
-
         Article article2 = new Article();
         article2.setId(2L);
         article2.setName("New Article 2");
 
-        ArticleDTO articleDTO2 = new ArticleDTO();
-        articleDTO2.setId(2L);
-        articleDTO2.setName("New ArticleDTO 2");
-        List<Article> articles = List.of(article1, article2);
-        List<ArticleDTO> articleDTOs = List.of(articleDTO1, articleDTO2);
+        when(articleService.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(article1, article2)));
 
-        when(articleService.findAll()).thenReturn(articles);
         when(articleMapper.toDTO(any())).thenAnswer(invocation -> {
             Article a = invocation.getArgument(0);
             ArticleDTO articleDTO = new ArticleDTO();
-            articleDTO.setId(a.getId());
             articleDTO.setName(a.getName());
             return articleDTO;
         });
@@ -77,7 +71,6 @@ public class ArticleControllerTest {
         article.setName("Test Article");
 
         ArticleDTO articleDTO = new ArticleDTO();
-        articleDTO.setId(1L);
         articleDTO.setName("Test Article");
 
         when(articleService.findById(1L)).thenReturn(Optional.of(article));
@@ -85,7 +78,6 @@ public class ArticleControllerTest {
 
         mockMvc.perform(get("/api/articles/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Test Article"));
     }
 

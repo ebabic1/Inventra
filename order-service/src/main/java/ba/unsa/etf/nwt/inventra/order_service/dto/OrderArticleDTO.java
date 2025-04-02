@@ -8,4 +8,3 @@ public class OrderArticleDTO {
     private Long articleId;
     private Integer quantity;
 }
-

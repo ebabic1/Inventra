@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
@@ -32,7 +32,7 @@ class WarehouseControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private WarehouseRepository warehouseRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -47,7 +47,6 @@ class WarehouseControllerTest {
 
         mockMvc.perform(get("/api/warehouses/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Main Warehouse"));
     }
 

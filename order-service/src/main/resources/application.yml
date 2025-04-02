@@ -16,6 +16,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        jdbc:
+          batch_size: 50
+          order_insert: true
 springdoc:
   api-docs:
     enabled: true

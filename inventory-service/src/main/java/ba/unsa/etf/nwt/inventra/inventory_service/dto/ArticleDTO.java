@@ -7,8 +7,6 @@ import java.time.LocalDate;
 
 @Data
 public class ArticleDTO {
-    private Long id;
-
     @NotBlank(message = "Article name is required")
     @Size(max = 100, message = "Article name cannot be longer than 100 characters")
     private String name;

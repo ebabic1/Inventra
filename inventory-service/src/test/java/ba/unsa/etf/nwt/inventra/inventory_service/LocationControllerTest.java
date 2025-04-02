@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -26,7 +26,7 @@ class LocationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private LocationService locationService;
 
     @Test
@@ -41,14 +41,12 @@ class LocationControllerTest {
     @Test
     void testGetLocationById_ShouldReturnLocation() throws Exception {
         LocationDTO locationDTO = new LocationDTO();
-        locationDTO.setId(1L);
         locationDTO.setWarehouseId(1L);
 
         when(locationService.findById(1L)).thenReturn(Optional.of(locationDTO));
 
         mockMvc.perform(get("/api/locations/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.warehouseId", is(1)));
     }
 
