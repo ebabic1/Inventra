@@ -17,6 +17,8 @@ public class Supplier {
     private String name;
     private String phone;
     private String email;
+
+    @Enumerated(EnumType.STRING)
     private SupplierCategory category;
 
     @OneToMany(mappedBy = "supplier",  cascade = CascadeType.ALL, fetch = FetchType.LAZY)

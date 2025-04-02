@@ -22,6 +22,8 @@ public class Order {
     private String name;
     private LocalDate orderDate;
     private LocalDate expiryDate;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private String invoice;
     private String purchaseOrder;
