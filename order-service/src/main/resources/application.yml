@@ -1,4 +1,17 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include=*:
+
 spring:
+  application:
+    name: order-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  profiles:
+    active: dev
+
   datasource:
     url: jdbc:mysql://localhost:3306/inventra_order_db
     username: root

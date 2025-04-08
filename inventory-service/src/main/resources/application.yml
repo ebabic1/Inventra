@@ -1,4 +1,11 @@
 spring:
+  application:
+    name: inventory-service
+  config:
+    import: "optional:configserver:"
+  profiles:
+    active: dev
+
   datasource:
     url: jdbc:mysql://localhost:3306/inventra_inventory_db
     username: root
