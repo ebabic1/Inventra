@@ -1,15 +1,10 @@
 package ba.unsa.etf.nwt.inventra.reporting_service.controller;
 
-import ba.unsa.etf.nwt.inventra.reporting_service.dto.ReportDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.service.ReportService;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 
 @RestController
@@ -45,6 +40,16 @@ public class ReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=most_ordered_articles_report.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfContent);
+    }
+
+    @GetMapping("/test-loadbalancing")
+    public ResponseEntity<String> testLoadBalancing() {
+        try {
+            String instancePort = reportService.getInstancePort();
+            return ResponseEntity.ok(instancePort);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error while testing load balancing.");
+        }
     }
 
 //    @GetMapping
