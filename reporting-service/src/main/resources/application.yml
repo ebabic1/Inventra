@@ -1,4 +1,10 @@
 spring:
+
+  application:
+    name: reporting-service
+  config:
+    import: "optional:configserver:"
+
   datasource:
     url: jdbc:mysql://localhost:3306/inventra_reporting_db
     username: root
