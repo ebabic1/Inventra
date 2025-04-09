@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +30,9 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
     private final OrderMapper orderMapper;
+
+    @Autowired
+    private Environment environment;
 
     @Operation(summary = "Batch insert articles", description = "Insert multiple articles in a single request")
     @ApiResponses(value = {
@@ -123,5 +129,13 @@ public class OrderController {
             @Parameter(description = "ID of the order to be deleted") @PathVariable Long id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Value("${server.port:unknown}")
+    private String instancePort;
+
+    @GetMapping("/instance-port")
+    public ResponseEntity<String> getInstancePort() {
+        return ResponseEntity.ok(instancePort);
     }
 }

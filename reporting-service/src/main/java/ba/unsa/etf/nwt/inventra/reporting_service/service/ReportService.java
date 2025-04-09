@@ -10,7 +10,9 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
@@ -19,6 +21,9 @@ import java.util.List;
 @Service
 public class ReportService {
     private final ReportRepository reportRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
@@ -102,4 +107,10 @@ public class ReportService {
             throw new RuntimeException("Error generating Article Ordered PDF report", e);
         }
     }
+
+    public String getInstancePort() {
+        String url = "http://order-service/api/orders/instance-port";
+        return restTemplate.getForObject(url, String.class);
+    }
+
 }
