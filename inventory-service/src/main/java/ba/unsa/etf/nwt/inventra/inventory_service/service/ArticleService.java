@@ -5,7 +5,6 @@ import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,9 +21,7 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final LocationRepository locationRepository;
-
-    @Autowired
-    private SupplierClient supplierClient;
+    private final SupplierClient supplierClient;
 
     public Page<Article> findAll(Pageable pageable) {
         return articleRepository.findAll(pageable);
@@ -37,7 +34,9 @@ public class ArticleService {
     @Transactional
     public List<Article> createBatch(List<Article> articles) {
         for (Article article : articles) {
-            // ToDo: call endpoint
+            if (!supplierClient.checkSupplierExists(article.getSupplierId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Supplier not found with ID: " + article.getSupplierId());
+            }
             if (!locationRepository.existsById(article.getLocation().getId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location not found with ID: " + article.getLocation().getId());
             }
@@ -47,7 +46,7 @@ public class ArticleService {
 
     @Transactional
     public Article create(Article article) {
-        if (supplierClient.checkSupplierExists(article.getSupplierId())) {
+        if (!supplierClient.checkSupplierExists(article.getSupplierId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Supplier not found with ID: " + article.getSupplierId());
         }
         if (!locationRepository.existsById(article.getLocation().getId())) {
@@ -60,7 +59,7 @@ public class ArticleService {
     public Article update(Long id, Article article) {
         Article existingArticle = articleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found with id: " + id));
-        if (supplierClient.checkSupplierExists(article.getSupplierId())) {
+        if (!supplierClient.checkSupplierExists(article.getSupplierId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Supplier not found with ID: " + article.getSupplierId());
         }
         if (!locationRepository.existsById(article.getLocation().getId())) {

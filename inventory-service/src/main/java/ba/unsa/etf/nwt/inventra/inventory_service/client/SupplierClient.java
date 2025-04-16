@@ -17,9 +17,9 @@ public class SupplierClient {
         String url = "http://order-service/api/suppliers/" + supplierId;
         try {
             restTemplate.getForEntity(url, SupplierDTO.class);
-            return false;
-        } catch (Exception e) {
             return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
