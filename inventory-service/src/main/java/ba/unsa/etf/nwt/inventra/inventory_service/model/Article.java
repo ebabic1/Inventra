@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @NamedEntityGraph(
         name = "Article.detail",
         attributeNodes = {
-                @NamedAttributeNode("supplier"),
                 @NamedAttributeNode("location")
         }
 )
@@ -33,9 +32,8 @@ public class Article {
     private boolean notifyLowStock;
     private boolean notifyExpiryDate;
 
-    @ManyToOne
-    @JoinColumn(name = "supplier_id", nullable = false)
-    private Supplier supplier;
+    @Column(name = "supplier_id", nullable = false)
+    private Long supplierId;
 
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
