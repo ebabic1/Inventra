@@ -48,11 +48,13 @@ public class LoadDatabase {
             Location location1 = new Location();
             location1.setName("Location X");
             location1.setWarehouse(warehouse1);
+            location1.setIsCapacityFull(true);
             locationRepository.save(location1);
 
             Location location2 = new Location();
             location2.setName("Location Y");
             location2.setWarehouse(warehouse1);
+            location2.setIsCapacityFull(false);
             locationRepository.save(location2);
 
             Article article1 = new Article();

@@ -1,5 +1,7 @@
 package ba.unsa.etf.nwt.inventra.order_service.controller;
 
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDetailsRequestDTO;
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDetailsResponseDTO;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderMapper;
 import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDTO;
 import ba.unsa.etf.nwt.inventra.order_service.model.Order;
@@ -40,12 +42,8 @@ public class OrderController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping("/batch")
-    public ResponseEntity<List<OrderDTO>> createArticlesBatch(@Valid @RequestBody List<OrderDTO> orderDTOs) {
-        List<Order> articles = orderDTOs.stream()
-                .map(orderMapper::toEntity)
-                .collect(Collectors.toList());
-
-        List<Order> createdArticles = orderService.createBatch(articles);
+    public ResponseEntity<List<OrderDTO>> createArticlesBatch(@Valid @RequestBody List<OrderDetailsRequestDTO> detailsDTOs) {
+        List<Order> createdArticles = orderService.createBatch(detailsDTOs);
 
         List<OrderDTO> responseDTOs = createdArticles.stream()
                 .map(orderMapper::toDTO)
@@ -77,12 +75,9 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<OrderDTO> getOrderById(
-            @Parameter(description = "ID of the order to be retrieved") @PathVariable Long id) {
-        return orderService.findById(id)
-                .map(orderMapper::toDTO)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<OrderDetailsResponseDTO> getOrderById(@PathVariable Long id) {
+        OrderDetailsResponseDTO order = orderService.findById(id);
+        return ResponseEntity.ok(order);
     }
 
     @PatchMapping("/{id}")
@@ -93,16 +88,16 @@ public class OrderController {
 
     @Operation(summary = "Create a new order", description = "Create a new order.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Order created successfully")
+            @ApiResponse(responseCode = "201", description = "Order created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "503", description = "Inventory service unavailable")
     })
     @PostMapping
     public ResponseEntity<OrderDTO> createOrder(
-            @RequestBody OrderDTO orderDTO) {
-        Order order = orderMapper.toEntity(orderDTO);
-        Order newOrder = orderService.create(order);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(orderMapper.toDTO(newOrder));
+            @RequestBody OrderDetailsRequestDTO detailsDTO) {
+
+        Order newOrder = orderService.create(detailsDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toDTO(newOrder));
     }
 
     @Operation(summary = "Update an existing order", description = "Update the details of an existing order.")
@@ -113,9 +108,8 @@ public class OrderController {
     @PutMapping("/{id}")
     public ResponseEntity<OrderDTO> updateOrder(
             @Parameter(description = "ID of the order to be updated") @PathVariable Long id,
-            @RequestBody OrderDTO orderDTO) {
-        Order order = orderMapper.toEntity(orderDTO);
-        Order updatedOrder = orderService.update(id, order);
+            @RequestBody OrderDetailsRequestDTO detailsDTO) {
+        Order updatedOrder = orderService.update(id, detailsDTO);
         return ResponseEntity.ok(orderMapper.toDTO(updatedOrder));
     }
 
