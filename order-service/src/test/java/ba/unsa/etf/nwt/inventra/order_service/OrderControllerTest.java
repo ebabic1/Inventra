@@ -2,33 +2,38 @@ package ba.unsa.etf.nwt.inventra.order_service;
 
 import ba.unsa.etf.nwt.inventra.order_service.controller.OrderController;
 import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDTO;
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDetailsRequestDTO;
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderDetailsResponseDTO;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderMapper;
 import ba.unsa.etf.nwt.inventra.order_service.model.Order;
 import ba.unsa.etf.nwt.inventra.order_service.service.OrderService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @WebMvcTest(OrderController.class)
-@ExtendWith(MockitoExtension.class)
 public class OrderControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private OrderService orderService;
@@ -52,7 +57,8 @@ public class OrderControllerTest {
 
         when(orderService.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(order1, order2)));
-        when(orderMapper.toDTO(any())).thenAnswer(invocation -> {
+
+        when(orderMapper.toDTO(any(Order.class))).thenAnswer(invocation -> {
             Order o = invocation.getArgument(0);
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setName(o.getName());
@@ -65,30 +71,15 @@ public class OrderControllerTest {
     }
 
     @Test
-    void getOrderById_ShouldReturnOrder() throws Exception {
-        Order order = new Order();
-        order.setId(1L);
-        order.setName("Test Order");
-        order.setOrderDate(LocalDate.now());
-        order.setDeliveryDate(LocalDate.now().plusDays(3));
+    void getOrderById_ShouldReturnOrderDetailsResponseDTO() throws Exception {
+        OrderDetailsResponseDTO responseDTO = new OrderDetailsResponseDTO();
+        responseDTO.setName("Test Order");
 
-        OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setName("Test Order");
-
-        when(orderService.findById(1L)).thenReturn(Optional.of(order));
-        when(orderMapper.toDTO(order)).thenReturn(orderDTO);
+        when(orderService.findById(1L)).thenReturn(responseDTO);
 
         mockMvc.perform(get("/api/orders/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Order"));
-    }
-
-    @Test
-    void getOrderById_ShouldReturnNotFound() throws Exception {
-        when(orderService.findById(1L)).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/orders/1"))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -97,5 +88,47 @@ public class OrderControllerTest {
 
         mockMvc.perform(delete("/api/orders/1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void patchOrder_ShouldReturnUpdatedOrder() throws Exception {
+        OrderDTO updates = new OrderDTO();
+        updates.setName("Updated Name");
+
+        Order updatedOrder = new Order();
+        updatedOrder.setId(1L);
+        updatedOrder.setName("Updated Name");
+
+        when(orderMapper.toEntity(any(OrderDTO.class))).thenReturn(updatedOrder);
+        when(orderService.patch(eq(1L), any(Order.class))).thenReturn(updatedOrder);
+        when(orderMapper.toDTO(updatedOrder)).thenReturn(updates);
+
+        mockMvc.perform(patch("/api/orders/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updates)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"));
+    }
+
+    @Test
+    void createOrder_ShouldReturnCreatedOrder() throws Exception {
+        OrderDetailsRequestDTO requestDTO = new OrderDetailsRequestDTO();
+        requestDTO.setName("New Order");
+
+        Order newOrder = new Order();
+        newOrder.setId(1L);
+        newOrder.setName("New Order");
+
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setName("New Order");
+
+        when(orderService.create(any(OrderDetailsRequestDTO.class))).thenReturn(newOrder);
+        when(orderMapper.toDTO(newOrder)).thenReturn(orderDTO);
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("New Order"));
     }
 }
