@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "ba.unsa.etf.nwt.system_events_service";
+option java_outer_classname = "SystemEventsProto";
+
+package ba.unsa.etf.nwt.system_events_service;
+
+message SystemEventRequest {
+  string timestamp = 1;
+  string microserviceName = 2;
+  string username = 3;
+  string actionType = 4;
+  string resourceName = 5;
+  string responseType = 6;
+}
+
+message SystemEventResponse {
+  string status = 1;
+  string message = 2;
+}
+
+service SystemEventsService {
+  rpc LogEvent(SystemEventRequest) returns (SystemEventResponse);
+}

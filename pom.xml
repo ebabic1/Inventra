@@ -34,6 +34,7 @@
 		<module>reporting-service</module>
 		<module>config-server</module>
 		<module>eureka-server</module>
+		<module>system-events-service</module>
 	</modules>
 
 	<properties>
