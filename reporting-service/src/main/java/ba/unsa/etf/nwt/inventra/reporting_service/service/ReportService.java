@@ -10,23 +10,29 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ReportService {
     private final ReportRepository reportRepository;
+    private final SystemEventsClient systemEventsClient;
 
     @Autowired
     private RestTemplate restTemplate;
 
-    public ReportService(ReportRepository reportRepository) {
+    public ReportService(ReportRepository reportRepository,
+                         SystemEventsClient systemEventsClient) {
         this.reportRepository = reportRepository;
+        this.systemEventsClient = systemEventsClient;
     }
 
     public byte[] generateOrderSummaryReport(LocalDateTime startDate, LocalDateTime endDate) {
@@ -64,9 +70,12 @@ public class ReportService {
 
             document.add(table);
             document.close();
-
+            logEvent("GENERATE_REPORT", "OrderSummary", "SUCCESS",
+                    "Successfully generated report");
             return out.toByteArray();
         } catch (Exception e) {
+            logEvent("GENERATE_REPORT", "OrderSummary", "FAILURE",
+                    "Failed to generate report: " + e.getMessage());
             throw new RuntimeException("Error generating PDF report", e);
         }
     }
@@ -101,9 +110,12 @@ public class ReportService {
 
             document.add(table);
             document.close();
-
+            logEvent("GENERATE_REPORT", "OrderSummary", "SUCCESS",
+                    "Successfully generated report");
             return out.toByteArray();
         } catch (Exception e) {
+            logEvent("GENERATE_REPORT", "ArticleOrdered", "FAILURE",
+                    "Failed to generate report: " + e.getMessage());
             throw new RuntimeException("Error generating Article Ordered PDF report", e);
         }
     }
@@ -113,4 +125,19 @@ public class ReportService {
         return restTemplate.getForObject(url, String.class);
     }
 
+    private void logEvent(String actionType, String resourceName,
+                          String responseType, String details) {
+        try {
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    actionType,
+                    resourceName,
+                    responseType + ": " + details
+            );
+        } catch (Exception e) {
+            log.error("Failed to log system event: " + e.getMessage());
+        }
+    }
 }
