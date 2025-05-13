@@ -1,10 +1,11 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.service;
 
-import ba.unsa.etf.nwt.system_events_service.SystemEventRequest;
-import ba.unsa.etf.nwt.system_events_service.SystemEventResponse;
-import ba.unsa.etf.nwt.system_events_service.SystemEventsServiceGrpc;
+import ba.unsa.etf.nwt.system_events_service.*;
+import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+
+import java.time.Instant;
 
 public class SystemEventsClient {
     private final SystemEventsServiceGrpc.SystemEventsServiceBlockingStub blockingStub;
@@ -16,8 +17,15 @@ public class SystemEventsClient {
         blockingStub = SystemEventsServiceGrpc.newBlockingStub(channel);
     }
 
-    public String logEvent(String timestamp, String microserviceName, String username,
-                           String actionType, String resourceName, String responseType) {
+    public String logEvent(String timestampStr, String microserviceName, String username,
+                           ActionType actionType, String resourceName, ResponseType responseType) {
+
+        Instant instant = Instant.parse(timestampStr);
+        Timestamp timestamp = Timestamp.newBuilder()
+                .setSeconds(instant.getEpochSecond())
+                .setNanos(instant.getNano())
+                .build();
+
         SystemEventRequest request = SystemEventRequest.newBuilder()
                 .setTimestamp(timestamp)
                 .setMicroserviceName(microserviceName)

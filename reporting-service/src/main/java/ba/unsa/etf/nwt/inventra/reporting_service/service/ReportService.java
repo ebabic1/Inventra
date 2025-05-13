@@ -3,6 +3,8 @@ package ba.unsa.etf.nwt.inventra.reporting_service.service;
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.ArticleDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.OrderSummaryDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.repository.ReportRepository;
+import ba.unsa.etf.nwt.system_events_service.ActionType;
+import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -70,12 +72,26 @@ public class ReportService {
 
             document.add(table);
             document.close();
-            logEvent("GENERATE_REPORT", "OrderSummary", "SUCCESS",
-                    "Successfully generated report");
+
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "OrderSummary",
+                    ResponseType.SUCCESS
+            );
+
             return out.toByteArray();
         } catch (Exception e) {
-            logEvent("GENERATE_REPORT", "OrderSummary", "FAILURE",
-                    "Failed to generate report: " + e.getMessage());
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "OrderSummary",
+                    ResponseType.FAILURE
+            );
             throw new RuntimeException("Error generating PDF report", e);
         }
     }
@@ -110,12 +126,26 @@ public class ReportService {
 
             document.add(table);
             document.close();
-            logEvent("GENERATE_REPORT", "OrderSummary", "SUCCESS",
-                    "Successfully generated report");
+
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "ArticleOrdered",
+                    ResponseType.SUCCESS
+            );
+
             return out.toByteArray();
         } catch (Exception e) {
-            logEvent("GENERATE_REPORT", "ArticleOrdered", "FAILURE",
-                    "Failed to generate report: " + e.getMessage());
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "ArticleOrdered",
+                    ResponseType.FAILURE
+            );
             throw new RuntimeException("Error generating Article Ordered PDF report", e);
         }
     }
@@ -123,21 +153,5 @@ public class ReportService {
     public String getInstancePort() {
         String url = "http://order-service/api/orders/instance-port";
         return restTemplate.getForObject(url, String.class);
-    }
-
-    private void logEvent(String actionType, String resourceName,
-                          String responseType, String details) {
-        try {
-            systemEventsClient.logEvent(
-                    Instant.now().toString(),
-                    "reporting-service",
-                    "current-user",
-                    actionType,
-                    resourceName,
-                    responseType + ": " + details
-            );
-        } catch (Exception e) {
-            log.error("Failed to log system event: " + e.getMessage());
-        }
     }
 }
