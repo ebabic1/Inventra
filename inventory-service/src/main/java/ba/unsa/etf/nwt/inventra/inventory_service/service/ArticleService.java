@@ -1,9 +1,9 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.service;
 
+import ba.unsa.etf.nwt.inventra.inventory_service.client.SupplierClient;
 import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.LocationRepository;
-import ba.unsa.etf.nwt.inventra.inventory_service.repository.SupplierRepository;
 import ba.unsa.etf.nwt.system_events_service.ActionType;
 import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +25,9 @@ import java.util.Optional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final SupplierRepository supplierRepository;
     private final LocationRepository locationRepository;
     private final SystemEventsClient systemEventsClient;
+    private final SupplierClient supplierClient;
 
     public Page<Article> findAll(Pageable pageable) {
         Page<Article> page = articleRepository.findAll(pageable);
@@ -87,14 +87,6 @@ public class ArticleService {
         if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
         if (updates.getQuantity() != null) existing.setQuantity(updates.getQuantity());
 
-        if (updates.getSupplier() != null && updates.getSupplier().getId() != null) {
-            Long supplierId = updates.getSupplier().getId();
-            if (!supplierRepository.existsById(supplierId)) {
-                throw failPatch("Supplier not found with id: " + supplierId);
-            }
-            existing.setSupplier(updates.getSupplier());
-        }
-
         if (updates.getLocation() != null && updates.getLocation().getId() != null) {
             Long locationId = updates.getLocation().getId();
             if (!locationRepository.existsById(locationId)) {
@@ -109,7 +101,7 @@ public class ArticleService {
     }
 
     private void validateArticleDependencies(Article article) {
-        if (!supplierRepository.existsById(article.getSupplier().getId())) {
+        if (!supplierClient.checkSupplierExists(article.getSupplierId())) {
             throw fail(ActionType.CREATE, "Supplier not found with id: " + article.getSupplier().getId());
         }
         if (!locationRepository.existsById(article.getLocation().getId())) {
