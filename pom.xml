@@ -35,6 +35,7 @@
 		<module>config-server</module>
 		<module>eureka-server</module>
 		<module>system-events-service</module>
+        <module>api-gateway</module>
 	</modules>
 
 	<properties>
