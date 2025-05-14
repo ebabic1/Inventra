@@ -3,9 +3,9 @@ package ba.unsa.etf.nwt.inventra.order_service.client;
 import ba.unsa.etf.nwt.inventra.order_service.dto.ArticleResponseDTO;
 import ba.unsa.etf.nwt.inventra.order_service.dto.LocationResponseDTO;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class InventoryClient {
@@ -23,7 +23,12 @@ public class InventoryClient {
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         } catch (ResourceAccessException e) {
-            throw new RuntimeException("Inventory service unavailable while fetching article with ID: " + articleId);
+            throw new RuntimeException("Inventory service unavailable while fetching article with ID: " + articleId, e);
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("No instances available for")) {
+                throw new RuntimeException("No instances of inventory-service available while fetching article with ID: " + articleId, e);
+            }
+            throw e; // rethrow any other IllegalStateException
         }
     }
 
@@ -34,7 +39,12 @@ public class InventoryClient {
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         } catch (ResourceAccessException e) {
-            throw new RuntimeException("Inventory service unavailable while fetching location with ID: " + locationId);
+            throw new RuntimeException("Inventory service unavailable while fetching location with ID: " + locationId, e);
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("No instances available for")) {
+                throw new RuntimeException("No instances of inventory-service available while fetching location with ID: " + locationId, e);
+            }
+            throw e;
         }
     }
 }

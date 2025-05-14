@@ -7,7 +7,6 @@
 		<artifactId>inventra</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>ba.unsa.etf.nwt.inventra</groupId>
 	<artifactId>inventory-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>inventory-service</name>
@@ -101,18 +100,18 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
         <dependency>
-            <groupId>ba.unsa.etf.nwt</groupId>
-            <artifactId>system-events-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>ba.unsa.etf.nwt.inventra</groupId>
             <artifactId>order-service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>ba.unsa.etf.nwt</groupId>
+			<artifactId>system-events-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>

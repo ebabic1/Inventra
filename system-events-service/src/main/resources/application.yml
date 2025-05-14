@@ -1,6 +1,7 @@
-server:
-  port: 8086
-
-grpc:
-  server:
-    port: 9090
+spring:
+  application:
+    name: system-events-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://localhost:8888

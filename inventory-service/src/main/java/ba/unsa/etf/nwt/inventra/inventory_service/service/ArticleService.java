@@ -102,7 +102,7 @@ public class ArticleService {
 
     private void validateArticleDependencies(Article article) {
         if (!supplierClient.checkSupplierExists(article.getSupplierId())) {
-            throw fail(ActionType.CREATE, "Supplier not found with id: " + article.getSupplier().getId());
+            throw fail(ActionType.CREATE, "Supplier not found with id: " + article.getSupplierId());
         }
         if (!locationRepository.existsById(article.getLocation().getId())) {
             throw fail(ActionType.CREATE, "Location not found with id: " + article.getLocation().getId());
