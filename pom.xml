@@ -36,6 +36,7 @@
 		<module>eureka-server</module>
 		<module>system-events-service</module>
         <module>api-gateway</module>
+		<module>auth-service</module>
 	</modules>
 
 	<properties>
