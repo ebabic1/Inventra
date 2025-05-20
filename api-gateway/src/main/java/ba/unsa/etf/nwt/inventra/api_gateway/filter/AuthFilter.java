@@ -21,7 +21,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        if (path.startsWith("/auth/api")) {
+        if (path.equals("/auth/api/users/login") || path.equals("/auth/api/users/register")) {
             return chain.filter(exchange);
         }
 
@@ -38,16 +38,22 @@ public class AuthFilter implements GlobalFilter, Ordered {
             String role = claims.get("role", String.class);
             String userId = claims.getSubject();
 
-            if (path.startsWith("/order/api") && !"WAREHOUSE_MANAGER".equals(role)) {
-                return onError(exchange, "Access denied for non WAREHOUSE_MANAGER users", HttpStatus.FORBIDDEN);
-            }
+            if (!"ADMIN".equals(role)) {
+                if (path.matches("^/auth/api/users/.+/role$")) {
+                    return onError(exchange, "Access denied for non ADMIN users", HttpStatus.FORBIDDEN);
+                }
 
-            if (path.startsWith("/inventory/api") && !"WAREHOUSE_OPERATOR".equals(role)) {
-                return onError(exchange, "Access denied for non WAREHOUSE_OPERATOR users", HttpStatus.FORBIDDEN);
-            }
+                if (path.startsWith("/order/api") && !"WAREHOUSE_MANAGER".equals(role)) {
+                    return onError(exchange, "Access denied for non WAREHOUSE_MANAGER users", HttpStatus.FORBIDDEN);
+                }
 
-            if (path.startsWith("/reporting/api") && !"ADMIN".equals(role)) {
-                return onError(exchange, "Access denied for non ADMIN users", HttpStatus.FORBIDDEN);
+                if (path.startsWith("/inventory/api") && !"WAREHOUSE_OPERATOR".equals(role)) {
+                    return onError(exchange, "Access denied for non WAREHOUSE_OPERATOR users", HttpStatus.FORBIDDEN);
+                }
+
+                if (path.startsWith("/reporting/api") && !"WAREHOUSE_MANAGER".equals(role)) {
+                    return onError(exchange, "Access denied for non WAREHOUSE_MANAGER users", HttpStatus.FORBIDDEN);
+                }
             }
 
             exchange.getRequest().mutate()

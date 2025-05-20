@@ -9,7 +9,9 @@ import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -27,8 +29,15 @@ public class UserService {
     private JwtUtil jwtUtil;
 
     public void initDefaultRoles() {
-        if (roleRepo.findByName("USER").isEmpty()) {
-            roleRepo.save(new Role(null, "USER"));
+        createRoleIfNotExists("USER");
+        createRoleIfNotExists("WAREHOUSE_OPERATOR");
+        createRoleIfNotExists("WAREHOUSE_MANAGER");
+        createRoleIfNotExists("ADMIN");
+    }
+
+    private void createRoleIfNotExists(String roleName) {
+        if (roleRepo.findByName(roleName).isEmpty()) {
+            roleRepo.save(new Role(null, roleName));
         }
     }
 
@@ -65,4 +74,52 @@ public class UserService {
 
         return ResponseEntity.ok(new UserResponseDTO("Login successful.", token));
     }
+
+    public List<UserDetailsResponseDTO> getAllUsers() {
+        return userRepo.findAll().stream().map(this::toDTO).toList();
+    }
+
+    public UserDetailsResponseDTO getUserById(UUID uuid) {
+        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        return toDTO(user);
+    }
+
+    public UserDetailsResponseDTO updateUserDetails(UUID uuid, UserUpdateDTO dto) {
+        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+        if (dto.getBio() != null) user.setBio(dto.getBio());
+
+        userRepo.save(user);
+        return toDTO(user);
+    }
+
+    public UserDetailsResponseDTO updateUserRole(UUID uuid, UserRoleUpdateDTO dto) {
+        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepo.findByName(dto.getRoleName()).orElseThrow(() -> new RuntimeException("Role not found"));
+
+        user.setRole(role);
+        userRepo.save(user);
+
+        return toDTO(user);
+    }
+
+    public void deleteUser(UUID uuid) {
+        if (!userRepo.existsById(uuid)) throw new RuntimeException("User not found");
+        userRepo.deleteById(uuid);
+    }
+
+    private UserDetailsResponseDTO toDTO(User user) {
+        UserDetailsResponseDTO dto = new UserDetailsResponseDTO();
+        dto.setUuid(user.getUuid());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setBio(user.getBio());
+        dto.setRole(user.getRole().getName());
+        return dto;
+    }
+
 }
