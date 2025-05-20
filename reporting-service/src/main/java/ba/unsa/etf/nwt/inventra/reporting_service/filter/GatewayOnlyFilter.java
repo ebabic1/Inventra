@@ -2,9 +2,7 @@ package ba.unsa.etf.nwt.inventra.reporting_service.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
@@ -21,16 +19,18 @@ public class GatewayOnlyFilter implements Filter {
         String path = req.getRequestURI();
         String gatewayHeader = req.getHeader("X-Gateway-Auth");
 
-        if ("true".equals(gatewayHeader)) {
+        boolean isSwaggerRequest = path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui.html");
+
+        if ("true".equalsIgnoreCase(gatewayHeader) || isSwaggerRequest) {
             chain.doFilter(request, response);
             return;
         }
 
-        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui.html")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Direct access denied. Use API Gateway.");
+        res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        res.setContentType("application/json");
+        res.getWriter().write("{\"error\": \"Direct access denied. Use API Gateway.\"}");
+        res.getWriter().flush();
     }
 }

@@ -1,7 +1,10 @@
 package ba.unsa.etf.nwt.inventra.auth_service.controller;
 
 import ba.unsa.etf.nwt.inventra.auth_service.dto.*;
+import ba.unsa.etf.nwt.inventra.auth_service.service.TokenBlacklistService;
 import ba.unsa.etf.nwt.inventra.auth_service.service.UserService;
+import ba.unsa.etf.nwt.inventra.auth_service.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +25,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
+
     @PostConstruct
     public void initRoles() {
         userService.initDefaultRoles();
@@ -28,14 +39,31 @@ public class UserController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Creates a new user account")
-    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO request) {
+    public ResponseEntity<UserRegisterResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO request) {
         return userService.register(request);
     }
 
     @PostMapping("/login")
     @Operation(summary = "Login a user", description = "Validates email and password")
-    public ResponseEntity<UserResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO request) {
+    public ResponseEntity<UserLoginResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO request) {
         return userService.login(request);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Missing token");
+        }
+
+        String token = authHeader.substring(7);
+        Claims claims = jwtUtil.extractAllClaims(token);
+        String jti = claims.getId();
+        Date expiration = claims.getExpiration();
+
+        long ttl = expiration.getTime() - System.currentTimeMillis();
+        tokenBlacklistService.blacklistToken(jti, ttl);
+
+        return ResponseEntity.ok(new MessageResponseDTO("Logged out successfully"));
     }
 
     @GetMapping
@@ -66,6 +94,6 @@ public class UserController {
     @Operation(summary = "Delete user")
     public ResponseEntity<String> deleteUser(@PathVariable UUID uuid) {
         userService.deleteUser(uuid);
-        return ResponseEntity.ok("User deleted");
+        return ResponseEntity.noContent().build();
     }
 }

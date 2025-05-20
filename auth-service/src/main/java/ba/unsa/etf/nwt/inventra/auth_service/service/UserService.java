@@ -41,10 +41,10 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<UserResponseDTO> register(UserRegisterRequestDTO dto) {
+    public ResponseEntity<UserRegisterResponseDTO> register(UserRegisterRequestDTO dto) {
         Optional<User> existingUser = userRepo.findByEmail(dto.getEmail());
         if (existingUser.isPresent()) {
-            return ResponseEntity.badRequest().body(new UserResponseDTO("Email already in use.", null));
+            return ResponseEntity.badRequest().body(new UserRegisterResponseDTO("Email already in use."));
         }
 
         User user = new User();
@@ -58,21 +58,21 @@ public class UserService {
         user.setRole(role);
 
         userRepo.save(user);
-        return ResponseEntity.ok(new UserResponseDTO("User registered successfully.", null));
+        return ResponseEntity.ok(new UserRegisterResponseDTO("User registered successfully."));
     }
 
-    public ResponseEntity<UserResponseDTO> login(UserLoginRequestDTO dto) {
+    public ResponseEntity<UserLoginResponseDTO> login(UserLoginRequestDTO dto) {
         Optional<User> userOpt = userRepo.findByEmail(dto.getEmail());
 
         if (userOpt.isEmpty() || !passwordEncoder.matches(dto.getPassword(), userOpt.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new UserResponseDTO("Invalid credentials.", null));
+                    .body(new UserLoginResponseDTO("Invalid credentials.", null));
         }
 
         User user = userOpt.get();
         String token = jwtUtil.generateToken(user);
 
-        return ResponseEntity.ok(new UserResponseDTO("Login successful.", token));
+        return ResponseEntity.ok(new UserLoginResponseDTO("Login successful.", token));
     }
 
     public List<UserDetailsResponseDTO> getAllUsers() {
