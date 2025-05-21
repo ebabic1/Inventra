@@ -3,6 +3,8 @@ package ba.unsa.etf.nwt.inventra.reporting_service.service;
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.ArticleDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.dto.OrderSummaryDTO;
 import ba.unsa.etf.nwt.inventra.reporting_service.repository.ReportRepository;
+import ba.unsa.etf.nwt.system_events_service.ActionType;
+import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -10,23 +12,29 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ReportService {
     private final ReportRepository reportRepository;
+    private final SystemEventsClient systemEventsClient;
 
     @Autowired
     private RestTemplate restTemplate;
 
-    public ReportService(ReportRepository reportRepository) {
+    public ReportService(ReportRepository reportRepository,
+                         SystemEventsClient systemEventsClient) {
         this.reportRepository = reportRepository;
+        this.systemEventsClient = systemEventsClient;
     }
 
     public byte[] generateOrderSummaryReport(LocalDateTime startDate, LocalDateTime endDate) {
@@ -65,8 +73,25 @@ public class ReportService {
             document.add(table);
             document.close();
 
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "OrderSummary",
+                    ResponseType.SUCCESS
+            );
+
             return out.toByteArray();
         } catch (Exception e) {
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "OrderSummary",
+                    ResponseType.FAILURE
+            );
             throw new RuntimeException("Error generating PDF report", e);
         }
     }
@@ -102,8 +127,25 @@ public class ReportService {
             document.add(table);
             document.close();
 
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "ArticleOrdered",
+                    ResponseType.SUCCESS
+            );
+
             return out.toByteArray();
         } catch (Exception e) {
+            systemEventsClient.logEvent(
+                    Instant.now().toString(),
+                    "reporting-service",
+                    "current-user",
+                    ActionType.CREATE,
+                    "ArticleOrdered",
+                    ResponseType.FAILURE
+            );
             throw new RuntimeException("Error generating Article Ordered PDF report", e);
         }
     }
@@ -112,5 +154,4 @@ public class ReportService {
         String url = "http://order-service/api/orders/instance-port";
         return restTemplate.getForObject(url, String.class);
     }
-
 }

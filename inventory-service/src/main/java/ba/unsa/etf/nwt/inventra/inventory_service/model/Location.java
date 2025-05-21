@@ -14,6 +14,7 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private Boolean isCapacityFull;
 
     @ManyToOne
     @JoinColumn(name = "warehouse_id", nullable = false)

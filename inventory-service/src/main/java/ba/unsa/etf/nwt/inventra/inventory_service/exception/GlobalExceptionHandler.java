@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,6 @@ public class GlobalExceptionHandler {
                         DefaultMessageSourceResolvable::getDefaultMessage,
                         (existing, replacement) -> existing
                 ));
-
         return ResponseEntity.badRequest().body(errors);
     }
 
@@ -40,7 +40,6 @@ public class GlobalExceptionHandler {
                         ConstraintViolation::getMessage,
                         (existing, replacement) -> existing
                 ));
-
         return ResponseEntity.badRequest().body(errors);
     }
 
@@ -59,7 +58,37 @@ public class GlobalExceptionHandler {
         response.put("error", "Invalid property in request");
         response.put("message", ex.getMessage());
         response.put("hint", "Check if the property exists in the entity");
-
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.put("error", "Unexpected error occurred");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("inventory service")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("timestamp", LocalDateTime.now());
+            response.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
+            response.put("error", "Inventory Service Unavailable");
+            response.put("message", ex.getMessage());
+
+            return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+        Map<String, Object> genericResponse = new HashMap<>();
+        genericResponse.put("timestamp", LocalDateTime.now());
+        genericResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        genericResponse.put("error", "Internal Server Error");
+        genericResponse.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(genericResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

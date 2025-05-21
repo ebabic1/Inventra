@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "ba.unsa.etf.nwt.system_events_service";
+option java_outer_classname = "SystemEventsProto";
+
+package ba.unsa.etf.nwt.system_events_service;
+
+import "google/protobuf/timestamp.proto";
+
+message SystemEventRequest {
+  google.protobuf.Timestamp timestamp = 1;
+  string microserviceName = 2;
+  string username = 3;
+  ActionType actionType = 4;
+  string resourceName = 5;
+  ResponseType responseType = 6;
+}
+
+message SystemEventResponse {
+  string status = 1;
+  string message = 2;
+}
+
+enum ActionType {
+  UNKNOWN_ACTION = 0;
+  CREATE = 1;
+  READ = 2;
+  UPDATE = 3;
+  DELETE = 4;
+  PATCH = 5;
+  CREATE_BATCH = 6;
+  GET = 7;
+  GET_ALL = 8;
+}
+
+enum ResponseType {
+  UNKNOWN_RESPONSE = 0;
+  SUCCESS = 1;
+  FAILURE = 2;
+}
+
+service SystemEventsService {
+  rpc LogEvent(SystemEventRequest) returns (SystemEventResponse);
+}

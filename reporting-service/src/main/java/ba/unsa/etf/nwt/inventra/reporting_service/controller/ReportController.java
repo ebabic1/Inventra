@@ -52,6 +52,7 @@ public class ReportController {
         }
     }
 
+
 //    @GetMapping
 //    public ResponseEntity<List<ReportDTO>> getAll() {
 //        List<Report> Reports = repository.findAll();

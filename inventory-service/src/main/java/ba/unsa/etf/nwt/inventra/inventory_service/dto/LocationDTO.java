@@ -13,5 +13,8 @@ public class LocationDTO {
 
     @NotNull(message = "Warehouse ID is required")
     private Long warehouseId;
+
+    @NotNull(message = "IsCapacityFull is required")
+    private Boolean isCapacityFull;
 }
 
