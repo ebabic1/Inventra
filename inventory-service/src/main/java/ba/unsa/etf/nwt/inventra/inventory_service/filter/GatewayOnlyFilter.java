@@ -18,19 +18,22 @@ public class GatewayOnlyFilter implements Filter {
 
         String path = req.getRequestURI();
         String gatewayHeader = req.getHeader("X-Gateway-Auth");
+        String internalHeader = req.getHeader("X-Internal-Auth");
 
         boolean isSwaggerRequest = path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-ui.html");
 
-        if ("true".equalsIgnoreCase(gatewayHeader) || isSwaggerRequest) {
+        if ("true".equalsIgnoreCase(gatewayHeader) ||
+                "true".equalsIgnoreCase(internalHeader) ||
+                isSwaggerRequest) {
             chain.doFilter(request, response);
             return;
         }
 
         res.setStatus(HttpServletResponse.SC_FORBIDDEN);
         res.setContentType("application/json");
-        res.getWriter().write("{\"error\": \"Direct access denied. Use API Gateway.\"}");
+        res.getWriter().write("{\"error\": \"Direct access denied. Use API Gateway or authorized service.\"}");
         res.getWriter().flush();
     }
 }

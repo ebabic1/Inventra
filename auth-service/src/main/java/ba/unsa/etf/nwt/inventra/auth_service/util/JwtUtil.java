@@ -40,21 +40,5 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
-    public boolean isTokenValid(String token) {
-        try {
-            return !extractAllClaims(token).getExpiration().before(new Date());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
-    }
-
-    public String extractRole(String token) {
-        return (String) extractAllClaims(token).get("role");
-    }
 }
 
