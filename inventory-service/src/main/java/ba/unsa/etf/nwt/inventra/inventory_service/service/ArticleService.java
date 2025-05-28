@@ -1,13 +1,16 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.service;
 
 import ba.unsa.etf.nwt.inventra.inventory_service.client.SupplierClient;
+import ba.unsa.etf.nwt.inventra.order_service.event.ArticleChangedEvent;
 import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.LocationRepository;
+import ba.unsa.etf.nwt.inventra.order_service.dto.OrderArticleDTO;
 import ba.unsa.etf.nwt.system_events_service.ActionType;
 import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ public class ArticleService {
     private final LocationRepository locationRepository;
     private final SystemEventsClient systemEventsClient;
     private final SupplierClient supplierClient;
+    private final RabbitTemplate rabbitTemplate;
 
     public Page<Article> findAll(Pageable pageable) {
         Page<Article> page = articleRepository.findAll(pageable);
@@ -39,6 +43,19 @@ public class ArticleService {
         Optional<Article> article = articleRepository.findById(id);
         logEvent(ActionType.GET, "Article", article.isPresent() ? ResponseType.SUCCESS : ResponseType.FAILURE);
         return article;
+    }
+
+    @Transactional
+    public void updateArticleStocks(List<OrderArticleDTO> articleIds) {
+        for (OrderArticleDTO orderArticle : articleIds) {
+            Article article = articleRepository.findById(orderArticle.getArticleId()).orElseThrow(() -> new  ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
+            if (article.getQuantity() < 0) {
+                logEvent(ActionType.UPDATE, "Article", ResponseType.FAILURE);
+                throw new IllegalStateException("Insufficient quantity for article ID " + orderArticle.getArticleId());
+            }
+            article.setQuantity(article.getQuantity() + orderArticle.getQuantity());
+            articleRepository.save(article);
+        }
     }
 
     @Transactional
@@ -54,6 +71,7 @@ public class ArticleService {
         validateArticleDependencies(article);
         Article saved = articleRepository.save(article);
         logEvent(ActionType.CREATE, "Article", ResponseType.SUCCESS);
+        sendArticleEvent(saved, "CREATED");
         return saved;
     }
 
@@ -66,16 +84,18 @@ public class ArticleService {
         article.setId(id);
         Article updated = articleRepository.save(article);
         logEvent(ActionType.UPDATE, "Article", ResponseType.SUCCESS);
+        sendArticleEvent(updated, "UPDATED");
         return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!articleRepository.existsById(id)) {
-            throw failDelete("Article not found with id: " + id);
-        }
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> failUpdate("Article not found with id: " + id));
+
         articleRepository.deleteById(id);
         logEvent(ActionType.DELETE, "Article", ResponseType.SUCCESS);
+        sendArticleEvent(article, "DELETED");
     }
 
     @Transactional
@@ -97,6 +117,7 @@ public class ArticleService {
 
         Article patched = articleRepository.save(existing);
         logEvent(ActionType.PATCH, "Article", ResponseType.SUCCESS);
+        sendArticleEvent(patched, "UPDATED");
         return patched;
     }
 
@@ -142,5 +163,16 @@ public class ArticleService {
         } catch (Exception e) {
             log.error("Failed to log system event: {}", e.toString());
         }
+    }
+
+    private void sendArticleEvent(Article article, String action) {
+        ArticleChangedEvent event = new ArticleChangedEvent();
+        event.setId(article.getId());
+        event.setName(article.getName());
+        event.setPrice(article.getPrice());
+        event.setCategory(article.getCategory());
+        event.setQuantity(article.getQuantity());
+        event.setAction(action);
+        rabbitTemplate.convertAndSend("inventra.exchange", "article.created", event);
     }
 }
