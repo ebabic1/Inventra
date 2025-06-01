@@ -121,5 +121,13 @@ public class UserController {
         userService.deleteUser(uuid);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/emails")
+    @Operation(summary = "Get all user emails", description = "Returns a list of email addresses of all registered users.")
+    public ResponseEntity<List<String>> getAllUserEmails(@RequestHeader HttpHeaders headers) {
+        List<String> emails = userService.getAllEmails();
+        return ResponseEntity.ok(emails);
+    }
+
 }
 

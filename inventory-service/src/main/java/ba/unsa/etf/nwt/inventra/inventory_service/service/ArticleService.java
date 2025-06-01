@@ -28,6 +28,7 @@ public class ArticleService {
     private final LocationRepository locationRepository;
     private final SystemEventsClient systemEventsClient;
     private final SupplierClient supplierClient;
+    private final NotificationPublisherService notificationPublisherService;
 
     public Page<Article> findAll(Pageable pageable) {
         Page<Article> page = articleRepository.findAll(pageable);
@@ -66,6 +67,13 @@ public class ArticleService {
         article.setId(id);
         Article updated = articleRepository.save(article);
         logEvent(ActionType.UPDATE, "Article", ResponseType.SUCCESS);
+
+        if (updated.getQuantity() <= 5) {
+            notificationPublisherService.sendLowStockNotification(
+                    updated.getName(),
+                    updated.getQuantity()
+            );
+        }
         return updated;
     }
 

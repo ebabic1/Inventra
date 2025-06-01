@@ -37,6 +37,7 @@
 		<module>system-events-service</module>
         <module>api-gateway</module>
 		<module>auth-service</module>
+		<module>notification-service</module>
 	</modules>
 
 	<properties>

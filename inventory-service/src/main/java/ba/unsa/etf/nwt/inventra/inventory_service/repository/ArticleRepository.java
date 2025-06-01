@@ -5,6 +5,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     @EntityGraph(value = "Article.detail")
     @NonNull
