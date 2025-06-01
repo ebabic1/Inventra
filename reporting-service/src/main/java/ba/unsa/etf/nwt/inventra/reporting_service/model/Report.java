@@ -28,6 +28,6 @@ public class Report {
     private ReportType type;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "report", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<OrderReport> orderReports;
 }

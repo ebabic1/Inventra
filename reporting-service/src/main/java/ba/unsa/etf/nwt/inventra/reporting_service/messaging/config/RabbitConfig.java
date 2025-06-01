@@ -17,7 +17,7 @@ public class RabbitConfig {
 
     public static final String EXCHANGE_NAME = "inventra.exchange";
 
-    public static final String ARTICLE_QUEUE = "article.changed.queue";
+    public static final String ARTICLE_QUEUE = "reporting.article.changed.queue";
     public static final String ARTICLE_CREATED_KEY = "article.created";
     public static final String ARTICLE_UPDATED_KEY = "article.updated";
     public static final String ARTICLE_DELETED_KEY = "article.deleted";

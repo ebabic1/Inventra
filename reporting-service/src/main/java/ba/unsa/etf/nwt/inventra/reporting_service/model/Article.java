@@ -18,7 +18,7 @@ public class Article {
     private Double price;
     private String category;
 
-    @OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "article", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<OrderArticle> orderArticles;

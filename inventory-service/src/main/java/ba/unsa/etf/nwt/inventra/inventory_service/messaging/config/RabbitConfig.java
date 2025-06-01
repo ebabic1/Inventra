@@ -15,50 +15,61 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
+    public static final String EXCHANGE_NAME = "inventra.exchange";
+
+    public static final String ORDER_FINISHED_QUEUE = "order.finished";
+    public static final String ORDER_ROLLBACK_QUEUE = "order.rollback";
+    public static final String ARTICLE_CHANGED_QUEUE = "order.article.changed";
+
+    public static final String ROUTING_KEY_ORDER_FINISHED = "order.finished";
+    public static final String ROUTING_KEY_ORDER_ROLLBACK = "order.rollback";
+    public static final String ROUTING_KEY_ARTICLE_CREATED = "article.created";
+    public static final String ROUTING_KEY_ARTICLE_UPDATED = "article.updated";
+    public static final String ROUTING_KEY_ARTICLE_DELETED = "article.deleted";
 
     @Bean
     public TopicExchange exchange() {
-        return new TopicExchange("inventra.exchange");
+        return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean
     public Queue inventoryFinishedQueue() {
-        return new Queue("order.finished");
+        return new Queue(ORDER_FINISHED_QUEUE);
     }
 
     @Bean
     public Queue orderRollbackQueue() {
-        return new Queue("order.rollback");
+        return new Queue(ORDER_ROLLBACK_QUEUE);
     }
 
     @Bean
     public Queue articleChangedQueue() {
-        return new Queue("article.changed");
+        return new Queue(ARTICLE_CHANGED_QUEUE);
     }
 
     @Bean
     public Binding inventoryBinding() {
-        return BindingBuilder.bind(inventoryFinishedQueue()).to(exchange()).with("order.finished");
+        return BindingBuilder.bind(inventoryFinishedQueue()).to(exchange()).with(ROUTING_KEY_ORDER_FINISHED);
     }
 
     @Bean
     public Binding rollbackBinding() {
-        return BindingBuilder.bind(orderRollbackQueue()).to(exchange()).with("order.rollback");
+        return BindingBuilder.bind(orderRollbackQueue()).to(exchange()).with(ROUTING_KEY_ORDER_ROLLBACK);
     }
 
     @Bean
-    public Binding articleCreatedBinding() {
-        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with("article.created");
+    public Binding orderArticleCreatedBinding() {
+        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with(ROUTING_KEY_ARTICLE_CREATED);
     }
 
     @Bean
-    public Binding articleUpdatedBinding() {
-        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with("article.updated");
+    public Binding orderArticleUpdatedBinding() {
+        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with(ROUTING_KEY_ARTICLE_UPDATED);
     }
 
     @Bean
-    public Binding articleDeletedBinding() {
-        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with("article.deleted");
+    public Binding orderArticleDeletedBinding() {
+        return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with(ROUTING_KEY_ARTICLE_DELETED);
     }
 
     @Bean

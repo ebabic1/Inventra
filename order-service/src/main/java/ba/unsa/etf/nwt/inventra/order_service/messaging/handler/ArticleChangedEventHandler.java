@@ -15,15 +15,17 @@ public class ArticleChangedEventHandler {
     private final ArticleService articleService;
 
     public void handle(ArticleChangedEvent articleChangedEvent) {
-        log.info("Handling ArticleChangedEvent for articleId={}", articleChangedEvent.getId());
         switch (articleChangedEvent.getAction()) {
             case CREATED:
+                log.info("Handling Article created event for articleId={}", articleChangedEvent.getId());
                 articleService.create(givenArticle(articleChangedEvent));
                 break;
             case UPDATED:
+                log.info("Handling Article updated event for articleId={}", articleChangedEvent.getId());
                 articleService.update(articleChangedEvent.getId(), givenArticle(articleChangedEvent));
                 break;
             case DELETED:
+                log.info("Handling Article deleted event for articleId={}", articleChangedEvent.getId());
                 articleService.delete(articleChangedEvent.getId());
                 break;
             default:
