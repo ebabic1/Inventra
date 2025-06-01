@@ -23,25 +23,36 @@ public class LoadDatabase {
                                    OrderRepository orderRepository,
                                    ReportRepository reportRepository) {
         return args -> {
+            Long nextArticleId = articleRepository.findMaxId()
+                    .map(maxId -> maxId + 1)
+                    .orElse(1L);
 
             Article article1 = new Article();
+            article1.setId(nextArticleId++);
             article1.setName("Laptop");
             article1.setPrice(1200.00);
             article1 = articleRepository.save(article1);
             log.info("Preloaded: {}", article1);
 
             Article article2 = new Article();
+            article2.setId(nextArticleId);
             article2.setName("Desk Chair");
             article2.setPrice(250.50);
             article2 = articleRepository.save(article2);
             log.info("Preloaded: {}", article2);
 
+            Long nextOrderId = orderRepository.findMaxId()
+                    .map(maxId -> maxId + 1)
+                    .orElse(1L);
+
             Order order1 = new Order();
+            order1.setId(nextOrderId++);
             order1.setOrderDate(LocalDateTime.now());
             order1 = orderRepository.save(order1);
             log.info("Preloaded: {}", order1);
 
             Order order2 = new Order();
+            order2.setId(nextOrderId);
             order2.setOrderDate(LocalDateTime.now());
             order2 = orderRepository.save(order2);
             log.info("Preloaded: {}", order2);

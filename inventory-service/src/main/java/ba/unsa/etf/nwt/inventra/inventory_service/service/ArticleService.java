@@ -1,7 +1,8 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.service;
 
+import ba.unsa.etf.nwt.EventAction;
 import ba.unsa.etf.nwt.inventra.inventory_service.client.SupplierClient;
-import ba.unsa.etf.nwt.inventra.order_service.event.ArticleChangedEvent;
+import ba.unsa.etf.nwt.inventra.inventory_service.messaging.publisher.ArticleEventPublisher;
 import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.LocationRepository;
@@ -10,7 +11,6 @@ import ba.unsa.etf.nwt.system_events_service.ActionType;
 import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class ArticleService {
     private final LocationRepository locationRepository;
     private final SystemEventsClient systemEventsClient;
     private final SupplierClient supplierClient;
-    private final RabbitTemplate rabbitTemplate;
+    private final ArticleEventPublisher articleEventPublisher;
 
     public Page<Article> findAll(Pageable pageable) {
         Page<Article> page = articleRepository.findAll(pageable);
@@ -71,7 +71,7 @@ public class ArticleService {
         validateArticleDependencies(article);
         Article saved = articleRepository.save(article);
         logEvent(ActionType.CREATE, "Article", ResponseType.SUCCESS);
-        sendArticleEvent(saved, "CREATED");
+        articleEventPublisher.publish(saved, EventAction.CREATED);
         return saved;
     }
 
@@ -84,7 +84,7 @@ public class ArticleService {
         article.setId(id);
         Article updated = articleRepository.save(article);
         logEvent(ActionType.UPDATE, "Article", ResponseType.SUCCESS);
-        sendArticleEvent(updated, "UPDATED");
+        articleEventPublisher.publish(updated, EventAction.UPDATED);
         return updated;
     }
 
@@ -95,7 +95,7 @@ public class ArticleService {
 
         articleRepository.deleteById(id);
         logEvent(ActionType.DELETE, "Article", ResponseType.SUCCESS);
-        sendArticleEvent(article, "DELETED");
+        articleEventPublisher.publish(article, EventAction.DELETED);
     }
 
     @Transactional
@@ -117,7 +117,7 @@ public class ArticleService {
 
         Article patched = articleRepository.save(existing);
         logEvent(ActionType.PATCH, "Article", ResponseType.SUCCESS);
-        sendArticleEvent(patched, "UPDATED");
+        articleEventPublisher.publish(patched, EventAction.UPDATED);
         return patched;
     }
 
@@ -163,16 +163,5 @@ public class ArticleService {
         } catch (Exception e) {
             log.error("Failed to log system event: {}", e.toString());
         }
-    }
-
-    private void sendArticleEvent(Article article, String action) {
-        ArticleChangedEvent event = new ArticleChangedEvent();
-        event.setId(article.getId());
-        event.setName(article.getName());
-        event.setPrice(article.getPrice());
-        event.setCategory(article.getCategory());
-        event.setQuantity(article.getQuantity());
-        event.setAction(action);
-        rabbitTemplate.convertAndSend("inventra.exchange", "article.created", event);
     }
 }

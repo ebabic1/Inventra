@@ -1,4 +1,4 @@
-package ba.unsa.etf.nwt.inventra.order_service.event;
+package ba.unsa.etf.nwt.inventra.order_service.messaging.event;
 
 import ba.unsa.etf.nwt.inventra.order_service.dto.OrderArticleDTO;
 import lombok.AllArgsConstructor;

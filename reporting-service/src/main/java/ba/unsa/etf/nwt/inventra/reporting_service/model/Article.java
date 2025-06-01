@@ -13,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Article {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private Double price;
@@ -21,5 +20,6 @@ public class Article {
 
     @OneToMany(mappedBy = "article")
     @JsonIgnore
+    @ToString.Exclude
     private List<OrderArticle> orderArticles;
 }

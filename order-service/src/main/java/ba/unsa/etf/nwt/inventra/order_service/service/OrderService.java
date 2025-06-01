@@ -1,9 +1,10 @@
 package ba.unsa.etf.nwt.inventra.order_service.service;
 
+import ba.unsa.etf.nwt.EventAction;
 import ba.unsa.etf.nwt.inventra.order_service.client.InventoryClient;
 import ba.unsa.etf.nwt.inventra.order_service.dto.*;
-import ba.unsa.etf.nwt.inventra.order_service.event.OrderEventPublisher;
-import ba.unsa.etf.nwt.inventra.order_service.event.OrderFinishedEvent;
+import ba.unsa.etf.nwt.inventra.order_service.messaging.event.OrderFinishedEvent;
+import ba.unsa.etf.nwt.inventra.order_service.messaging.publisher.OrderEventPublisher;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderArticleMapper;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderMapper;
 import ba.unsa.etf.nwt.inventra.order_service.model.*;
@@ -75,7 +76,10 @@ public class OrderService {
 
         Order order = orderMapper.fromOrderDetails(detailsDTO, supplier);
         logEvent(ActionType.CREATE, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(order);
+        order.setStatus(OrderStatus.NOT_SENT);
+        Order saved = orderRepository.save(order);
+        orderEventPublisher.publishOrderChangedEvent(saved, EventAction.CREATED);
+        return saved;
     }
 
     @Transactional
@@ -89,15 +93,19 @@ public class OrderService {
 
         Order updatedOrder = orderMapper.fromOrderDetails(detailsDTO, supplier);
         updatedOrder.setId(existingOrder.getId());
+        updatedOrder.setStatus(existingOrder.getStatus());
 
         logEvent(ActionType.UPDATE, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(updatedOrder);
+        Order updated = orderRepository.save(updatedOrder);
+        orderEventPublisher.publishOrderChangedEvent(updated, EventAction.UPDATED);
+        return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-        validateOrderExists(ActionType.DELETE, id);
+        Order deleted = validateOrderExists(ActionType.DELETE, id);
         orderRepository.deleteById(id);
+        orderEventPublisher.publishOrderChangedEvent(deleted, EventAction.DELETED);
         logEvent(ActionType.DELETE, "Order", ResponseType.SUCCESS);
     }
 
@@ -110,7 +118,9 @@ public class OrderService {
         }
 
         logEvent(ActionType.PATCH, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(existingOrder);
+        Order patched = orderRepository.save(existingOrder);
+        orderEventPublisher.publishOrderChangedEvent(patched, EventAction.UPDATED);
+        return patched;
     }
 
     @Transactional

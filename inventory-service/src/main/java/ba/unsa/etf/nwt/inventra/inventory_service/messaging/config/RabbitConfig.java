@@ -1,4 +1,4 @@
-package ba.unsa.etf.nwt.inventra.inventory_service.config;
+package ba.unsa.etf.nwt.inventra.inventory_service.messaging.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
