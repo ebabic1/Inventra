@@ -1,60 +1,52 @@
 package ba.unsa.etf.nwt.inventra.order_service.config;
 
 import ba.unsa.etf.nwt.inventra.order_service.model.*;
-import ba.unsa.etf.nwt.inventra.order_service.repository.ArticleRepository;
-import ba.unsa.etf.nwt.inventra.order_service.repository.OrderArticleRepository;
-import ba.unsa.etf.nwt.inventra.order_service.repository.OrderRepository;
-import ba.unsa.etf.nwt.inventra.order_service.repository.SupplierRepository;
+import ba.unsa.etf.nwt.inventra.order_service.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Configuration
 public class LoadDatabase {
 
-    private final ArticleRepository articleRepository;
-    private final OrderRepository orderRepository;
-    private final OrderArticleRepository orderArticleRepository;
-    private final SupplierRepository supplierRepository;
-
-    public LoadDatabase(ArticleRepository articleRepository,
-                        OrderArticleRepository orderArticleRepository,
-                        OrderRepository orderRepository,
-                        SupplierRepository supplierRepository) {
-        this.articleRepository = articleRepository;
-        this.orderRepository = orderRepository;
-        this.orderArticleRepository = orderArticleRepository;
-        this.supplierRepository = supplierRepository;
-    }
-
     @Bean
-    CommandLineRunner initDatabase() {
+    CommandLineRunner initDatabase(ArticleRepository articleRepository,
+                                   OrderArticleRepository orderArticleRepository,
+                                   OrderRepository orderRepository,
+                                   SupplierRepository supplierRepository) {
         return args -> {
             Supplier supplier1 = new Supplier();
             supplier1.setName("Tech Supplies Ltd.");
             supplier1.setPhone("+12345678901");
             supplier1.setEmail("contact@techsupplies.com");
             supplier1.setCategory(SupplierCategory.LOCAL);
-            supplier1 = supplierRepository.save(supplier1);
+            supplierRepository.save(supplier1);
 
             Supplier supplier2 = new Supplier();
             supplier2.setName("Office Essentials Co.");
             supplier2.setPhone("+10987654321");
             supplier2.setEmail("sales@officeessentials.com");
             supplier2.setCategory(SupplierCategory.INTERNATIONAL);
-            supplier2 = supplierRepository.save(supplier2);
+            supplierRepository.save(supplier2);
+
+            Long nextArticleId = articleRepository.findMaxId()
+                    .map(maxId -> maxId + 1)
+                    .orElse(1L);
 
             Article article1 = new Article();
+            article1.setId(nextArticleId++);
             article1.setName("Laptop");
             article1.setPrice(1200.00);
-            article1 = articleRepository.save(article1);
+            articleRepository.save(article1);
 
             Article article2 = new Article();
+            article2.setId(nextArticleId++);
             article2.setName("Desk Chair");
             article2.setPrice(250.50);
-            article2 = articleRepository.save(article2);
+            articleRepository.save(article2);
 
             Order order1 = new Order();
             order1.setName("Office Equipment Order");
@@ -65,7 +57,7 @@ public class LoadDatabase {
             order1.setInvoice("INV-2024001");
             order1.setStatus(OrderStatus.PENDING);
             order1.setNote("Urgent delivery required.");
-            order1 = orderRepository.save(order1);
+            orderRepository.save(order1);
 
             Order order2 = new Order();
             order2.setName("Workstation Setup Order");
@@ -76,7 +68,7 @@ public class LoadDatabase {
             order2.setInvoice("INV-2024002");
             order2.setStatus(OrderStatus.NOT_SENT);
             order2.setNote("Ensure quality checks.");
-            order2 = orderRepository.save(order2);
+            orderRepository.save(order2);
 
             OrderArticle orderArticle1 = new OrderArticle();
             orderArticle1.setOrder(order1);

@@ -86,6 +86,17 @@ public class OrderController {
         return ResponseEntity.ok(orderMapper.toDTO(updatedOrder));
     }
 
+    @Operation(summary = "Mark order as FINISHED asynchronously", description = "Marks an order as FINISHED using Saga choreography and RabbitMQ.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Order update initiated"),
+            @ApiResponse(responseCode = "404", description = "Order not found")
+    })
+    @PostMapping("/{id}/finish")
+    public ResponseEntity<String> markOrderAsFinished(@PathVariable Long id) {
+        orderService.markAsFinished(id);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Order finish initiated.");
+    }
+
     @Operation(summary = "Create a new order", description = "Create a new order.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Order created successfully"),

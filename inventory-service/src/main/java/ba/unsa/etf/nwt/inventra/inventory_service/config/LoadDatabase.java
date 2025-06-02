@@ -49,6 +49,7 @@ public class LoadDatabase {
             article1.setSupplierId(1L);
             article1.setLocation(location1);
             article1.setPrice(3.99);
+            article1.setQuantity(0);
             articleRepository.save(article1);
 
             Article article2 = new Article();
@@ -56,6 +57,7 @@ public class LoadDatabase {
             article2.setSupplierId(2L);
             article2.setLocation(location2);
             article2.setPrice(20.5);
+            article2.setQuantity(0);
             articleRepository.save(article2);
         };
     }
