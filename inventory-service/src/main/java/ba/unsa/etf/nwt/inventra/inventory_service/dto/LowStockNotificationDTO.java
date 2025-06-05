@@ -8,14 +8,18 @@ import lombok.Setter;
 public class LowStockNotificationDTO {
     //TODO: Use mapper later and add id
 
-    private String articleName;
+    private Long id;
+    private String name;
+    private String category;
     private int quantity;
 
     public LowStockNotificationDTO() {}
 
-    public LowStockNotificationDTO(String articleName, int quantity) {
-        this.articleName = articleName;
+    public LowStockNotificationDTO(String name, int quantity, Long id, String category) {
+        this.name = name;
         this.quantity = quantity;
+        this.id = id;
+        this.category = category;
     }
 
 }

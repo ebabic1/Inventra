@@ -71,7 +71,9 @@ public class ArticleService {
         if (updated.getQuantity() <= 5) {
             notificationPublisherService.sendLowStockNotification(
                     updated.getName(),
-                    updated.getQuantity()
+                    updated.getQuantity(),
+                    updated.getId(),
+                    updated.getCategory()
             );
         }
         return updated;
@@ -93,7 +95,17 @@ public class ArticleService {
 
         if (updates.getName() != null) existing.setName(updates.getName());
         if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
-        if (updates.getQuantity() != null) existing.setQuantity(updates.getQuantity());
+        if (updates.getQuantity() != null) {
+            existing.setQuantity(updates.getQuantity());
+            if (updates.getQuantity() <= 5) {
+                notificationPublisherService.sendLowStockNotification(
+                        existing.getName(),
+                        existing.getQuantity(),
+                        existing.getId(),
+                        existing.getCategory()
+                );
+            }
+        }
 
         if (updates.getLocation() != null && updates.getLocation().getId() != null) {
             Long locationId = updates.getLocation().getId();

@@ -1,42 +1,39 @@
-package ba.unsa.etf.nwt.inventra.notification_service.service;
+package ba.unsa.etf.nwt.inventra.notification_service.client;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-@Slf4j
-@Service
-public class UsersService {
+@Component
+public class AuthClient {
 
     private final RestTemplate restTemplate;
 
-    public UsersService(RestTemplate restTemplate) {
+    public AuthClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     public List<String> getAllUserEmails() {
-        String gatewayUrl = "http://localhost:8085/auth/api/users/emails";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Service-Name", "NotificationService");
+        String url = "http://auth-service/api/users/emails";
 
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Internal-Auth", "true");
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         try {
             ResponseEntity<List<String>> response = restTemplate.exchange(
-                    gatewayUrl,
+                    url,
                     HttpMethod.GET,
-                    entity,
+                    requestEntity,
                     new ParameterizedTypeReference<List<String>>() {}
             );
 
             return response.getBody() != null ? response.getBody() : List.of();
-
         } catch (Exception e) {
-            log.error("Failed to fetch user emails through Gateway API: {}", e.getMessage(), e);
             return List.of();
         }
     }

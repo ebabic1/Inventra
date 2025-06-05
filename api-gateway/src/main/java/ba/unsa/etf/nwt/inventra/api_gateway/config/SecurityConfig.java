@@ -18,13 +18,7 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(ex -> ex
                         .pathMatchers("/auth/api/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .pathMatchers("/api/users/emails").access((auth, context) -> {
-                            boolean isAuthorized = context.getExchange().getRequest().getHeaders()
-                                    .getOrEmpty("X-Service-Name")
-                                    .contains("NotificationService");
-
-                            return Mono.just(new AuthorizationDecision(isAuthorized));
-                        }).anyExchange().permitAll() // TODO: Check this if it's okay
+                        .anyExchange().permitAll()
                 )
                 .build();
     }

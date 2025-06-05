@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class LowStockNotificationDTO {
-    private String articleName;
+    private Long id;
+    private String name;
     private int quantity;
+    private String category;
 }

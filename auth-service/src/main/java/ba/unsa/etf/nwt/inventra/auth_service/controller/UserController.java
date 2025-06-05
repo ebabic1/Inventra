@@ -128,6 +128,5 @@ public class UserController {
         List<String> emails = userService.getAllEmails();
         return ResponseEntity.ok(emails);
     }
-
 }
 

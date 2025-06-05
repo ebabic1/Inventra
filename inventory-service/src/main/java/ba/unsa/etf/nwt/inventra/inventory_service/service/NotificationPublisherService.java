@@ -11,8 +11,8 @@ public class NotificationPublisherService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void sendLowStockNotification(String articleName, int quantity) {
-        LowStockNotificationDTO notification = new LowStockNotificationDTO(articleName, quantity);
+    public void sendLowStockNotification(String name, int quantity, Long id, String category) {
+        LowStockNotificationDTO notification = new LowStockNotificationDTO(name, quantity, id, category);
 
         rabbitTemplate.convertAndSend("inventra.exchange", "notification.lowstock", notification);
     }
