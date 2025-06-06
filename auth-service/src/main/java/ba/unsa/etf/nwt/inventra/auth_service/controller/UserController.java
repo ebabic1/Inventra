@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,15 +21,17 @@ import java.util.UUID;
 @Tag(name = "User Management", description = "Endpoints for user management")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    public final UserService userService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    public final JwtUtil jwtUtil;
 
-    @Autowired
-    private TokenBlacklistService tokenBlacklistService;
+    public final TokenBlacklistService tokenBlacklistService;
 
+    public UserController(UserService userService, JwtUtil jwtUtil, TokenBlacklistService blacklistService) {
+        this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = blacklistService;
+        this.userService = userService;
+    }
 
     @PostConstruct
     public void initRoles() {
@@ -66,6 +67,30 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponseDTO("Logged out successfully"));
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current logged-in user info", description = "Returns info about the currently authenticated user")
+    public ResponseEntity<UserDetailsResponseDTO> getCurrentUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        Claims claims = jwtUtil.extractAllClaims(token);
+
+        String userEmail = claims.getSubject();
+
+        if (userEmail == null || userEmail.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UserDetailsResponseDTO userDetails = userService.getUserByEmail(userEmail);
+        if (userDetails == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(userDetails);
+    }
+
     @GetMapping
     @Operation(summary = "Get all users")
     public List<UserDetailsResponseDTO> getAllUsers() {
@@ -96,4 +121,12 @@ public class UserController {
         userService.deleteUser(uuid);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/emails")
+    @Operation(summary = "Get all user emails", description = "Returns a list of email addresses of all registered users.")
+    public ResponseEntity<List<String>> getAllUserEmails(@RequestHeader HttpHeaders headers) {
+        List<String> emails = userService.getAllEmails();
+        return ResponseEntity.ok(emails);
+    }
 }
+

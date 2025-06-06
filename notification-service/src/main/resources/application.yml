@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: notification-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${CONFIG_MAIL_USERNAME}
+    password: ${CONFIG_MAIL_PASSWORD}
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+

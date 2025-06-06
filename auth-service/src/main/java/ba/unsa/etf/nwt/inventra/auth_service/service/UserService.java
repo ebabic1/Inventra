@@ -1,6 +1,7 @@
 package ba.unsa.etf.nwt.inventra.auth_service.service;
 
 import ba.unsa.etf.nwt.inventra.auth_service.dto.*;
+import ba.unsa.etf.nwt.inventra.auth_service.mapper.UserMapper;
 import ba.unsa.etf.nwt.inventra.auth_service.model.*;
 import ba.unsa.etf.nwt.inventra.auth_service.repository.*;
 import ba.unsa.etf.nwt.inventra.auth_service.util.JwtUtil;
@@ -12,21 +13,28 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepo;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
 
-    @Autowired
-    private RoleRepository roleRepo;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    public UserService(UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil,
+                       UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.userMapper = userMapper;
+    }
 
     public void initDefaultRoles() {
         createRoleIfNotExists("USER");
@@ -36,13 +44,13 @@ public class UserService {
     }
 
     private void createRoleIfNotExists(String roleName) {
-        if (roleRepo.findByName(roleName).isEmpty()) {
-            roleRepo.save(new Role(null, roleName));
+        if (roleRepository.findByName(roleName).isEmpty()) {
+            roleRepository.save(new Role(null, roleName));
         }
     }
 
     public ResponseEntity<UserRegisterResponseDTO> register(UserRegisterRequestDTO dto) {
-        Optional<User> existingUser = userRepo.findByEmail(dto.getEmail());
+        Optional<User> existingUser = userRepository.findByEmail(dto.getEmail());
         if (existingUser.isPresent()) {
             return ResponseEntity.badRequest().body(new UserRegisterResponseDTO("Email already in use."));
         }
@@ -54,15 +62,15 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setBio(dto.getBio());
 
-        Role role = roleRepo.findByName("USER").orElseThrow();
+        Role role = roleRepository.findByName("USER").orElseThrow();
         user.setRole(role);
 
-        userRepo.save(user);
+        userRepository.save(user);
         return ResponseEntity.ok(new UserRegisterResponseDTO("User registered successfully."));
     }
 
     public ResponseEntity<UserLoginResponseDTO> login(UserLoginRequestDTO dto) {
-        Optional<User> userOpt = userRepo.findByEmail(dto.getEmail());
+        Optional<User> userOpt = userRepository.findByEmail(dto.getEmail());
 
         if (userOpt.isEmpty() || !passwordEncoder.matches(dto.getPassword(), userOpt.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -76,50 +84,51 @@ public class UserService {
     }
 
     public List<UserDetailsResponseDTO> getAllUsers() {
-        return userRepo.findAll().stream().map(this::toDTO).toList();
+        return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
     public UserDetailsResponseDTO getUserById(UUID uuid) {
-        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
-        return toDTO(user);
+        User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.toDTO(user);
     }
 
     public UserDetailsResponseDTO updateUserDetails(UUID uuid, UserUpdateDTO dto) {
-        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
         if (dto.getLastName() != null) user.setLastName(dto.getLastName());
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getBio() != null) user.setBio(dto.getBio());
 
-        userRepo.save(user);
-        return toDTO(user);
+        userRepository.save(user);
+        return userMapper.toDTO(user);
     }
 
     public UserDetailsResponseDTO updateUserRole(UUID uuid, UserRoleUpdateDTO dto) {
-        User user = userRepo.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
-        Role role = roleRepo.findByName(dto.getRoleName()).orElseThrow(() -> new RuntimeException("Role not found"));
+        User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepository.findByName(dto.getRoleName()).orElseThrow(() -> new RuntimeException("Role not found"));
 
         user.setRole(role);
-        userRepo.save(user);
+        userRepository.save(user);
 
-        return toDTO(user);
+        return userMapper.toDTO(user);
     }
 
     public void deleteUser(UUID uuid) {
-        if (!userRepo.existsById(uuid)) throw new RuntimeException("User not found");
-        userRepo.deleteById(uuid);
+        if (!userRepository.existsById(uuid)) throw new RuntimeException("User not found");
+        userRepository.deleteById(uuid);
     }
 
-    private UserDetailsResponseDTO toDTO(User user) {
-        UserDetailsResponseDTO dto = new UserDetailsResponseDTO();
-        dto.setUuid(user.getUuid());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setEmail(user.getEmail());
-        dto.setBio(user.getBio());
-        dto.setRole(user.getRole().getName());
-        return dto;
+    public UserDetailsResponseDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        return userMapper.toDTO(user);
     }
 
+    public List<String> getAllEmails() {
+        return userRepository.findAll().stream()
+                .map(User::getEmail)
+                .collect(Collectors.toList());
+    }
 }

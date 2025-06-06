@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface LocationMapper {
     @Mapping(source = "warehouse.id", target = "warehouseId")  // Manually map warehouseId
     LocationDTO toDTO(Location location);
+
     @Mapping(source = "warehouseId", target = "warehouse")  // Manually map warehouseId to Warehouse
     Location toEntity(LocationDTO locationDTO);
 

@@ -3,6 +3,7 @@ package ba.unsa.etf.nwt.inventra.inventory_service.service;
 import ba.unsa.etf.nwt.EventAction;
 import ba.unsa.etf.nwt.inventra.inventory_service.client.SupplierClient;
 import ba.unsa.etf.nwt.inventra.inventory_service.messaging.publisher.ArticleEventPublisher;
+import ba.unsa.etf.nwt.inventra.inventory_service.messaging.publisher.NotificationPublisher;
 import ba.unsa.etf.nwt.inventra.inventory_service.model.Article;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.ArticleRepository;
 import ba.unsa.etf.nwt.inventra.inventory_service.repository.LocationRepository;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,13 @@ public class ArticleService {
     private final SystemEventsClient systemEventsClient;
     private final SupplierClient supplierClient;
     private final ArticleEventPublisher articleEventPublisher;
+    private final NotificationPublisher notificationPublisherService;
+
+    public List<Article> findArticlesExpiringWithinDays(int days) {
+        LocalDate today = LocalDate.now();
+        LocalDate nearExpiryDate = today.plusDays(7);
+        return articleRepository.findByExpiryDateBetween(today, nearExpiryDate);
+    }
 
     public Page<Article> findAll(Pageable pageable) {
         Page<Article> page = articleRepository.findAll(pageable);
@@ -85,6 +94,15 @@ public class ArticleService {
         Article updated = articleRepository.save(article);
         logEvent(ActionType.UPDATE, "Article", ResponseType.SUCCESS);
         articleEventPublisher.publish(updated, EventAction.UPDATED);
+
+        if (updated.getQuantity() <= 5 && article.isNotifyLowStock()) {
+            notificationPublisherService.sendLowStockNotification(
+                    updated.getName(),
+                    updated.getQuantity(),
+                    updated.getId(),
+                    updated.getCategory()
+            );
+        }
         return updated;
     }
 
@@ -105,7 +123,17 @@ public class ArticleService {
 
         if (updates.getName() != null) existing.setName(updates.getName());
         if (updates.getPrice() != null) existing.setPrice(updates.getPrice());
-        if (updates.getQuantity() != null) existing.setQuantity(updates.getQuantity());
+        if (updates.getQuantity() != null) {
+            existing.setQuantity(updates.getQuantity());
+            if (updates.getQuantity() <= 5 && existing.isNotifyLowStock()) {
+                notificationPublisherService.sendLowStockNotification(
+                        existing.getName(),
+                        existing.getQuantity(),
+                        existing.getId(),
+                        existing.getCategory()
+                );
+            }
+        }
 
         if (updates.getLocation() != null && updates.getLocation().getId() != null) {
             Long locationId = updates.getLocation().getId();

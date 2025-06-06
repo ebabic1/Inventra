@@ -27,6 +27,12 @@ public class RabbitConfig {
     public static final String ROUTING_KEY_ARTICLE_UPDATED = "article.updated";
     public static final String ROUTING_KEY_ARTICLE_DELETED = "article.deleted";
 
+    public static final String LOW_STOCK_QUEUE = "notification.lowstock";
+    public static final String LOW_STOCK_ROUTING_KEY = "notification.lowstock";
+
+    public static final String EXPIRY_DATE_QUEUE = "notification.expirydate";
+    public static final String EXPIRY_DATE_ROUTING_KEY = "notification.expirydate";
+
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE_NAME);
@@ -45,6 +51,16 @@ public class RabbitConfig {
     @Bean
     public Queue articleChangedQueue() {
         return new Queue(ARTICLE_CHANGED_QUEUE);
+    }
+
+    @Bean
+    public Queue lowStockQueue() {
+        return new Queue(LOW_STOCK_QUEUE);
+    }
+
+    @Bean
+    public Queue expiryDateQueue() {
+        return new Queue(EXPIRY_DATE_QUEUE);
     }
 
     @Bean
@@ -70,6 +86,16 @@ public class RabbitConfig {
     @Bean
     public Binding orderArticleDeletedBinding() {
         return BindingBuilder.bind(articleChangedQueue()).to(exchange()).with(ROUTING_KEY_ARTICLE_DELETED);
+    }
+
+    @Bean
+    public Binding lowStockBinding() {
+        return BindingBuilder.bind(lowStockQueue()).to(exchange()).with(LOW_STOCK_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding expiryDateBinding() {
+        return BindingBuilder.bind(expiryDateQueue()).to(exchange()).with(EXPIRY_DATE_ROUTING_KEY);
     }
 
     @Bean

@@ -69,7 +69,6 @@ public class ArticleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of articles")
     })
-
     @GetMapping
     public ResponseEntity<List<ArticleDTO>> getAllArticles(
             @RequestParam(defaultValue = "0") int pageNo,
