@@ -111,6 +111,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+
+        <dependency>
+            <groupId>ba.unsa.etf.nwt.inventra</groupId>
+            <artifactId>order-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
 		<dependency>
 			<groupId>ba.unsa.etf.nwt</groupId>
 			<artifactId>system-events-service</artifactId>
@@ -121,6 +128,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>ba.unsa.etf.nwt</groupId>
+			<artifactId>inventra-events</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Article {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Article name is required")

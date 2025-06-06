@@ -1,16 +1,20 @@
 package ba.unsa.etf.nwt.inventra.order_service.service;
 
+import ba.unsa.etf.nwt.EventAction;
 import ba.unsa.etf.nwt.inventra.order_service.client.InventoryClient;
 import ba.unsa.etf.nwt.inventra.order_service.dto.*;
+import ba.unsa.etf.nwt.inventra.order_service.messaging.event.OrderFinishedEvent;
+import ba.unsa.etf.nwt.inventra.order_service.messaging.publisher.OrderEventPublisher;
+import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderArticleMapper;
 import ba.unsa.etf.nwt.inventra.order_service.mapper.OrderMapper;
-import ba.unsa.etf.nwt.inventra.order_service.model.Order;
-import ba.unsa.etf.nwt.inventra.order_service.model.Supplier;
+import ba.unsa.etf.nwt.inventra.order_service.model.*;
 import ba.unsa.etf.nwt.inventra.order_service.repository.OrderRepository;
 import ba.unsa.etf.nwt.inventra.order_service.repository.SupplierRepository;
 import ba.unsa.etf.nwt.system_events_service.ActionType;
 import ba.unsa.etf.nwt.system_events_service.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,17 +24,20 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final OrderArticleMapper orderArticleMapper;
 
     private final OrderRepository orderRepository;
     private final SupplierRepository supplierRepository;
     private final OrderMapper orderMapper;
     private final InventoryClient inventoryClient;
     private final SystemEventsClient systemEventsClient;
+    private final OrderEventPublisher orderEventPublisher;
 
     public Page<Order> findAll(Pageable pageable) {
         Page<Order> page = orderRepository.findAll(pageable);
@@ -69,7 +76,10 @@ public class OrderService {
 
         Order order = orderMapper.fromOrderDetails(detailsDTO, supplier);
         logEvent(ActionType.CREATE, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(order);
+        order.setStatus(OrderStatus.NOT_SENT);
+        Order saved = orderRepository.save(order);
+        orderEventPublisher.publishOrderChangedEvent(saved, EventAction.CREATED);
+        return saved;
     }
 
     @Transactional
@@ -83,15 +93,19 @@ public class OrderService {
 
         Order updatedOrder = orderMapper.fromOrderDetails(detailsDTO, supplier);
         updatedOrder.setId(existingOrder.getId());
+        updatedOrder.setStatus(existingOrder.getStatus());
 
         logEvent(ActionType.UPDATE, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(updatedOrder);
+        Order updated = orderRepository.save(updatedOrder);
+        orderEventPublisher.publishOrderChangedEvent(updated, EventAction.UPDATED);
+        return updated;
     }
 
     @Transactional
     public void delete(Long id) {
-        validateOrderExists(ActionType.DELETE, id);
+        Order deleted = validateOrderExists(ActionType.DELETE, id);
         orderRepository.deleteById(id);
+        orderEventPublisher.publishOrderChangedEvent(deleted, EventAction.DELETED);
         logEvent(ActionType.DELETE, "Order", ResponseType.SUCCESS);
     }
 
@@ -104,7 +118,39 @@ public class OrderService {
         }
 
         logEvent(ActionType.PATCH, "Order", ResponseType.SUCCESS);
-        return orderRepository.save(existingOrder);
+        Order patched = orderRepository.save(existingOrder);
+        orderEventPublisher.publishOrderChangedEvent(patched, EventAction.UPDATED);
+        return patched;
+    }
+
+    @Transactional
+    public void markAsFinished(Long orderId) {
+        Order order = validateOrderExists(ActionType.UPDATE, orderId);
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only orders with status PENDING can be finished.");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        orderRepository.save(order);
+
+        OrderFinishedEvent event = new OrderFinishedEvent(
+                orderId,
+                order.getOrderArticles().stream()
+                        .map(orderArticleMapper::toDTO)
+                        .collect(Collectors.toList()),
+                false
+        );
+        orderEventPublisher.publishOrderFinishedEvent(event);
+    }
+
+    @RabbitListener(queues = "order.rollback")
+    public void handleInventoryRollback(OrderFinishedEvent event) {
+        Order order = this.validateOrderExists(ActionType.UPDATE, event.getOrderId());
+        if (event.isRollback()) {
+            order.setStatus(OrderStatus.PENDING);
+            orderRepository.save(order);
+        }
     }
 
     private Order validateOrderExists(ActionType actionType, Long id) {
