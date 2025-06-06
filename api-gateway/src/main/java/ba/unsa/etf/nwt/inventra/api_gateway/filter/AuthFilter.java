@@ -76,6 +76,11 @@ public class AuthFilter implements GlobalFilter, Ordered {
             return true;
         }
 
+        // Always allow user info route
+        if (path.equals("/auth/api/users/me")) {
+            return true;
+        }
+
         // Admin has full access
         if ("ADMIN".equals(role)) {
             return true;
