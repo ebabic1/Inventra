@@ -20,6 +20,19 @@ public class RabbitConfig {
     public static final String LOW_STOCK_QUEUE = "notification.lowstock";
     public static final String LOW_STOCK_ROUTING_KEY = "notification.lowstock";
 
+    public static final String EXPIRY_DATE_QUEUE = "notification.expirydate";
+    public static final String EXPIRY_DATE_ROUTING_KEY = "notification.expirydate";
+
+    @Bean
+    public Queue expiryDateQueue() {
+        return new Queue(EXPIRY_DATE_QUEUE);
+    }
+
+    @Bean
+    public Binding expiryDateBinding() {
+        return BindingBuilder.bind(expiryDateQueue()).to(exchange()).with(EXPIRY_DATE_ROUTING_KEY);
+    }
+
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE_NAME);

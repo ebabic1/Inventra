@@ -1,11 +1,15 @@
 package ba.unsa.etf.nwt.inventra.inventory_service.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArticleDTO {
     @NotBlank(message = "Article name is required")
     @Size(max = 100, message = "Article name cannot be longer than 100 characters")
