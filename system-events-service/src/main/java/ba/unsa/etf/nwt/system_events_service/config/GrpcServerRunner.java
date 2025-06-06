@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 public class GrpcServerRunner implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(GrpcServerRunner.class);
-
     private final Server grpcServer;
 
     public GrpcServerRunner(Server grpcServer) {
@@ -23,12 +22,19 @@ public class GrpcServerRunner implements CommandLineRunner {
         grpcServer.start();
         logger.info("gRPC Server started, listening on port {}", grpcServer.getPort());
 
+        new Thread(() -> {
+            try {
+                grpcServer.awaitTermination();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("gRPC server thread interrupted", e);
+            }
+        }, "grpc-await-thread").start();
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutting down gRPC server");
             grpcServer.shutdown();
         }));
-
-        grpcServer.awaitTermination();
     }
 
     @PreDestroy
