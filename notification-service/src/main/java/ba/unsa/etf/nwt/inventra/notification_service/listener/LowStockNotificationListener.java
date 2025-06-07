@@ -4,6 +4,7 @@ import ba.unsa.etf.nwt.inventra.notification_service.client.AuthClient;
 import ba.unsa.etf.nwt.inventra.notification_service.config.RabbitConfig;
 import ba.unsa.etf.nwt.inventra.notification_service.dto.LowStockNotificationDTO;
 import ba.unsa.etf.nwt.inventra.notification_service.service.EmailService;
+import ba.unsa.etf.nwt.inventra.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,12 +20,13 @@ public class LowStockNotificationListener {
 
     private final EmailService emailService;
     private final AuthClient authClient;
+    private final NotificationService notificationService;
 
     @RabbitListener(queues = RabbitConfig.LOW_STOCK_QUEUE)
     public void onLowStockNotification(LowStockNotificationDTO notification) {
         log.info("Received low stock notification: {}", notification);
-        try {
 
+        try {
             List<String> emails = authClient.getAllUserEmails();
             if (emails.isEmpty()) {
                 log.warn("No user emails found for notification.");
@@ -38,6 +40,12 @@ public class LowStockNotificationListener {
                             "' (ID: " + notification.getId() + ", Category: " + notification.getCategory() +
                             ") is running low on stock. Current quantity: " +
                             notification.getQuantity()
+            );
+
+            notificationService.createAndSendNotification(
+                    "Low Stock Alert",
+                    "The article '" + notification.getName() + "' is running low on stock. Current quantity: " + notification.getQuantity(),
+                    null
             );
 
         } catch (Exception e) {

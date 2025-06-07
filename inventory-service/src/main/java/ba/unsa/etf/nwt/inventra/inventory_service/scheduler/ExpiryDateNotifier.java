@@ -18,8 +18,8 @@ public class ExpiryDateNotifier {
         this.notificationPublisher = notificationPublisher;
     }
 
-    //@Scheduled(cron = "0 * * * * ?") every minute
-    @Scheduled(cron = "0 0 8 * * ?")
+    //@Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 * * * * ?") //every minute
     public void checkForExpiringItems() {
         List<Article> expiringArticles = articleService.findArticlesExpiringWithinDays(7);
 

@@ -56,6 +56,13 @@ public class AuthFilter implements GlobalFilter, Ordered {
     }
 
     private String extractToken(ServerWebExchange exchange) {
+        // Check query parameters first for web socket service
+        String token = exchange.getRequest().getQueryParams().getFirst("token");
+        if (token != null) {
+            return token;
+        }
+
+        // Fallback to header if needed
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -76,8 +83,13 @@ public class AuthFilter implements GlobalFilter, Ordered {
             return true;
         }
 
-        // Always allow user info route
+        // Allow all authenticated roles to access user info
         if (path.equals("/auth/api/users/me")) {
+            return true;
+        }
+
+        // Allow all authenticated roles to access websocket endpoints
+        if (path.startsWith("/ws/")) {
             return true;
         }
 

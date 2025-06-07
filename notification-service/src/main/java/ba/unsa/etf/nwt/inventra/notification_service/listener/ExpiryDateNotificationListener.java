@@ -4,6 +4,7 @@ import ba.unsa.etf.nwt.inventra.notification_service.client.AuthClient;
 import ba.unsa.etf.nwt.inventra.notification_service.config.RabbitConfig;
 import ba.unsa.etf.nwt.inventra.notification_service.dto.ExpiryDateNotificationDTO;
 import ba.unsa.etf.nwt.inventra.notification_service.service.EmailService;
+import ba.unsa.etf.nwt.inventra.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,6 +19,7 @@ public class ExpiryDateNotificationListener {
 
     private final EmailService emailService;
     private final AuthClient authClient;
+    private final NotificationService notificationService;
 
     @RabbitListener(queues = RabbitConfig.EXPIRY_DATE_QUEUE)
     public void onExpiryDateNotification(ExpiryDateNotificationDTO notification) {
@@ -37,6 +39,12 @@ public class ExpiryDateNotificationListener {
                             "' (ID: " + notification.getId() + ", Category: " + notification.getCategory() +
                             ") is nearing its expiry date. Expiry date: " +
                             notification.getExpiryDate()
+            );
+
+            notificationService.createAndSendNotification(
+                    "Expiry Alert",
+                    "The article '" + notification.getName() + "' is nearing its expiry date: " + notification.getExpiryDate(),
+                    null
             );
 
         } catch (Exception e) {
